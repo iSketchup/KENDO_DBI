@@ -1,0 +1,64 @@
+from fastapi import APIRouter, HTTPException
+from fastapi.params import Depends
+from pydantic import BaseModel, field_validator, Field
+from fastapi_restful.cbv import cbv
+from sqlalchemy.orm import Session
+
+from database import get_db
+import models
+from routers.base import BaseAPI
+
+router = APIRouter(prefix="/user", tags=["User"])
+
+class UserCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    passwd: str = Field(...,min_length=8)
+
+    @field_validator("name")
+    @classmethod
+    def name_with_whitespace(cls, value:str):
+        if not ' ' in value:
+            return value
+        else:
+            raise ValueError("Name must not contain whitespaces")
+
+
+class UserResponse(UserCreate):
+    id: int
+
+    class ConfigDict:
+        from_attributes: True
+
+
+
+@cbv(router)
+class UsersAPI(BaseAPI):
+    db : Session = Depends(get_db)
+
+    @router.get("/", response_model=list[UserResponse])
+    def users(self):
+        return self.db.query(models.DBUsers).all()
+
+
+    @router.post("/", response_model=UserResponse)
+    def new_user(self, item: UserCreate):
+        newuser = models.DBUsers(name=item.name, passwd=item.passwd)
+        self.db.add(newuser)
+        self.db.commit()
+        self.db.refresh(newuser)
+        return newuser
+        # Muss zurückgegeben werden, damit der Validationhandler es auch validieren kann.
+
+
+    @router.delete("/", response_model=UserResponse)
+    def del_user(self, item_id: int):
+        item = self.db.query(models.DBUsers).filter(models.DBUsers.id == item_id).first()
+
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
+                                                        f" wurde nicht gefunden")
+        self.db.delete(item)
+        self.db.commit()
+        self.db.refresh(item)
+        return item
+        # Wie es oben beim return beschrieben ist.

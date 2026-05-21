@@ -7,14 +7,15 @@ from starlette.responses import JSONResponse
 
 from database import engine
 import models
-from routers import *
+from routers import user
+
 
 # Erstellt alle Tabellen im Datenbank Schema (falls noch nicht vorhanden)
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="myApp", description="myApp", version="1.0.0")
 
-
+app.include_router(user.router)
 # Custome valdidation Error handler
 
 @app.exception_handler(RequestValidationError)
@@ -22,11 +23,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = []
     for error in exc.errors():
         field = error.get("loc")[-1]
-        erro_msg = error.get("msg")
-        errors.append({"field": field, "msg": erro_msg})
-    return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"status": "validationerror ", "errors": errors})
-
-
+        error_msg = error.get("msg")
+        errors.append({"field": field, "msg": error_msg})
+    return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={
+        "status": "validation_error ",
+        "errors": errors
+    })
 
 @app.get("/")
 def root():
