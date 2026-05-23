@@ -11,10 +11,10 @@ from routers.base import BaseAPI
 router = APIRouter(prefix="/user", tags=["User"])
 
 class UserCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=50)
+    UserName: str = Field(..., min_length=1, max_length=31)
     passwd: str = Field(...,min_length=8)
 
-    @field_validator("name")
+    @field_validator("UserName")
     @classmethod
     def name_with_whitespace(cls, value:str):
         if not ' ' in value:
@@ -24,10 +24,10 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(UserCreate):
-    id: int
+    UserId: int
 
     class ConfigDict:
-        from_attributes: True
+        from_attributes = True
 
 
 
@@ -42,7 +42,7 @@ class UsersAPI(BaseAPI):
 
     @router.post("/", response_model=UserResponse)
     def new_user(self, item: UserCreate):
-        newuser = models.DBUsers(name=item.name, passwd=item.passwd)
+        newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
         self.db.add(newuser)
         self.db.commit()
         self.db.refresh(newuser)
@@ -52,13 +52,10 @@ class UsersAPI(BaseAPI):
 
     @router.delete("/", response_model=UserResponse)
     def del_user(self, item_id: int):
-        item = self.db.query(models.DBUsers).filter(models.DBUsers.id == item_id).first()
+        item = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
 
         if not item:
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
                                                         f" wurde nicht gefunden")
         self.db.delete(item)
         self.db.commit()
-        self.db.refresh(item)
-        return item
-        # Wie es oben beim return beschrieben ist.
