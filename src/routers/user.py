@@ -46,7 +46,7 @@ class UsersAPI(BaseAPI):
 
         if newuser.UserName == newuser.UserName:
             raise HTTPException(status_code=403, detail="Es ist nicht erlaubt User"
-                                                        "mit gleichen Namen zu erstellen")
+                                                        "mit gleichen Namen zu erstellen") #
 
         self.db.add(newuser)
         self.db.commit()
