@@ -48,7 +48,8 @@ class UsersAPI(BaseAPI):
 
         if user:
             raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
-                                                        "mit gleichen Namen zu erstellen") #
+                                                        "mit gleichen Namen zu erstellen")
+
 
         newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
         self.db.add(newuser)
@@ -60,6 +61,13 @@ class UsersAPI(BaseAPI):
 
     @router.put("/", response_model=UserResponse)
     def change_user(self, item: UserCreate, item_id: int):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.UserName).first()
+
+        if user:
+            raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
+                                                        "mit gleichen Namen zu erstellen")
+
+
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
 
         if not item:
