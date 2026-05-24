@@ -50,7 +50,23 @@ class UsersAPI(BaseAPI):
         # Muss zurückgegeben werden, damit der Validationhandler es auch validieren kann.
 
 
-    @router.delete("/", response_model=UserResponse)
+    @router.put("/", response_model=UserResponse)
+    def change_user(self, item: UserCreate, item_id: int):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
+
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
+                                                        f" wurde nicht gefunden")
+
+        user.UserName = item.UserName
+        user.passwd = item.passwd
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+
+    @router.delete("/", status_code=204)
     def del_user(self, item_id: int):
         item = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
 
