@@ -43,6 +43,11 @@ class UsersAPI(BaseAPI):
     @router.post("/", response_model=UserResponse)
     def new_user(self, item: UserCreate):
         newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
+
+        if newuser.UserName == newuser.UserName:
+            raise HTTPException(status_code=403, detail="Es ist nicht erlaubt User"
+                                                        "mit gleichen Namen zu erstellen") #
+
         self.db.add(newuser)
         self.db.commit()
         self.db.refresh(newuser)
