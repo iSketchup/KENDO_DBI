@@ -28,3 +28,11 @@ class ShadersAPI(BaseAPI):
     def get_shader(self, idx: int):
         return self.db.query(models.DBShader).filter(models.DBShader.ShaderId == idx).all()
 
+
+    @router.post("/", response_model=ShaderCreate)
+    def new_shader(self, item: ShaderCreate):
+        new = models.DBShader(**item.model_dump())
+        self.db.add(new)
+        self.db.commit()
+        self.db.refresh(new)
+        return new
