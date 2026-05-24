@@ -7,8 +7,7 @@ from starlette.responses import JSONResponse
 
 from database import engine
 import models
-from routers import user
-
+from routers import user, shader
 
 # Erstellt alle Tabellen im Datenbank Schema (falls noch nicht vorhanden)
 models.Base.metadata.create_all(bind=engine)
@@ -16,6 +15,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="myApp", description="myApp", version="1.0.0")
 
 app.include_router(user.router)
+app.include_router(shader.router)
 # Custome valdidation Error handler
 
 @app.exception_handler(RequestValidationError)
