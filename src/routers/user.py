@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,8 @@ from routers.base import BaseAPI
 router = APIRouter(prefix="/user", tags=["User"])
 
 class UserCreate(BaseModel):
-    UserName: str = Field(..., min_length=1, max_length=31)
+    model_config = ConfigDict(populate_by_name=True)
+    UserName: str = Field(..., min_length=1, max_length=31, alias="UserName") # Hier wird eine Alias für das JSON gesetzt
     passwd: str = Field(...,min_length=8)
 
     @field_validator("UserName")
