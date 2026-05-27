@@ -1,3 +1,4 @@
+import bcrypt
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from pydantic import BaseModel, field_validator, Field, ConfigDict
@@ -10,26 +11,20 @@ from routers.base import BaseAPI
 
 from passlib.context import CryptContext # Bibliothek für das Hashing
 
-# Aufbau vom Hashing (Hashingart ...)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 
 router = APIRouter(prefix="/user", tags=["User"])
 
-# Password sollte gehasht werden.
-def password_hashing(password: str):
-    return pwd_context.hash(password)
 
-# Das Password sollte verifziert werden
-def verify_password(plain_password: str, hashed_password) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
 
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     UserName: str = Field(..., min_length=1, max_length=31, alias="UserName") # Hier wird eine Alias für das JSON gesetzt
-    passwd: str = Field(...,min_length=8)
+    passwd: str = Field(..., min_length=8)
 
     @field_validator("UserName")
     @classmethod
@@ -50,23 +45,34 @@ class UserResponse(UserCreate):
 
 @cbv(router)
 class UsersAPI(BaseAPI):
-    db : Session = Depends(get_db)
+    db: Session = Depends(get_db)
+
 
     @router.get("/", response_model=list[UserResponse])
     def users(self):
         return self.db.query(models.DBUsers).all()
+
+    @router.get("/{username}", response_model=UserResponse)
+    def login(self, username: str, password: str):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if not bcrypt.checkpw(password, user.passwd):
+            raise HTTPException(status_code=404, detail="Login is invalid")
+
+        return user
 
 
     @router.post("/", response_model=UserResponse)
     def new_user(self, item: UserCreate):
         # Hier wird nachgeschaut, ob ein User mit diesen Namen schon vorhanden ist.
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.UserName).first()
-
+        #hashed_pw = self.password_hashing(user.passwd)
 
         if user:
             raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
                                                         "mit gleichen Namen zu erstellen")
-
 
         newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
         self.db.add(newuser)
@@ -78,7 +84,6 @@ class UsersAPI(BaseAPI):
 
     @router.put("/", response_model=UserResponse)
     def change_user(self, item: UserCreate, item_id: int):
-        passw = self.db.query(models.DBUsers).filter(models.DBUsers.passwd == item.passwd).first()
 
         # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
         existing = (self.db.query(models.DBUsers).filter
