@@ -8,7 +8,23 @@ from database import get_db
 import models
 from routers.base import BaseAPI
 
+from passlib.context import CryptContext # Bibliothek für das Hashing
+
+# Aufbau vom Hashing (Hashingart ...)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+
 router = APIRouter(prefix="/user", tags=["User"])
+
+# Password sollte gehasht werden.
+def password_hashing(password: str):
+    return pwd_context.hash(password)
+
+# Das Password sollte verifziert werden
+def verify_password(plain_password: str, hashed_password) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -62,16 +78,23 @@ class UsersAPI(BaseAPI):
 
     @router.put("/", response_model=UserResponse)
     def change_user(self, item: UserCreate, item_id: int):
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.UserName).first()
+        passw = self.db.query(models.DBUsers).filter(models.DBUsers.passwd == item.passwd).first()
 
-        if user:
+        # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
+        existing = (self.db.query(models.DBUsers).filter
+                    (
+                        models.DBUsers.UserName == item.UserName,
+                        models.DBUsers.UserId != item.UserId
+                     ).first())
+
+        if existing:
             raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
                                                         "mit gleichen Namen zu erstellen")
 
 
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
 
-        if not item:
+        if not user:
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
                                                         f" wurde nicht gefunden")
 
@@ -85,10 +108,10 @@ class UsersAPI(BaseAPI):
 
     @router.delete("/", status_code=204)
     def del_user(self, item_id: int):
-        item = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
 
-        if not item:
+        if not user:
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
                                                         f" wurde nicht gefunden")
-        self.db.delete(item)
+        self.db.delete(user)
         self.db.commit()
