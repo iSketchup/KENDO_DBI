@@ -52,14 +52,15 @@ class UsersAPI(BaseAPI):
     def users(self):
         return self.db.query(models.DBUsers).all()
 
-    @router.get("/{username}", response_model=UserResponse)
-    def login(self, username: str, password: str):
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
+    @router.get("/login", response_model=list[UserResponse])
+    def login(self, UserName: str, passwd: str):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == UserName).first()
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if not bcrypt.checkpw(password, user.passwd):
-            raise HTTPException(status_code=404, detail="Login is invalid")
+        if not bcrypt.checkpw(passwd.encode("utf-8"), user.passwd.encode("utf-8")):
+            raise HTTPException(status_code=401, detail="Login is invalid")
 
         return user
 
