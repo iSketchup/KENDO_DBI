@@ -34,6 +34,10 @@ class UserCreate(BaseModel):
         else:
             raise ValueError("Name must not contain whitespaces")
 
+# Response-Klasse für das Login
+class LoginRequest(BaseModel):
+    UserName: str
+    passwd: str
 
 class UserResponse(UserCreate):
     UserId: int
@@ -52,14 +56,18 @@ class UsersAPI(BaseAPI):
     def users(self):
         return self.db.query(models.DBUsers).all()
 
-    @router.get("/login", response_model=list[UserResponse])
-    def login(self, UserName: str, passwd: str):
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == UserName).first()
+    @router.post("/login", response_model=UserResponse)
+    def login(self, request: LoginRequest):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == request.UserName).first()
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if not bcrypt.checkpw(passwd.encode("utf-8"), user.passwd.encode("utf-8")):
+        print(repr(user.passwd))
+        print(repr(request.passwd))
+        print(len(user.passwd))
+
+        if not bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8")):
             raise HTTPException(status_code=401, detail="Login is invalid")
 
         return user
