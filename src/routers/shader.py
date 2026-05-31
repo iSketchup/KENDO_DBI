@@ -23,6 +23,7 @@ def populate_shaderlikes(self, shaders):
     for shader in shaders:
         shader.ShaderLikes = self.db.query(models.DBLikes).filter(models.DBLikes.shader_id == shader.ShaderId).count()
     return shaders
+
 @cbv(router)
 class ShaderTags(BaseAPI):
     db : Session = Depends(get_db)
@@ -34,6 +35,16 @@ class ShaderTags(BaseAPI):
     @router.get("/{shader_id}", response_model=ShaderResponse)
     def get_shader_by_id(self, shader_id: int):
         return self.db.query(models.DBShader).filter(models.DBShader.ShaderId == shader_id).first()
+
+    @router.put("/{shader_id}", response_model=ShaderCreate)
+    def get_shader_by_id(self, shader_id: int, item: ShaderCreate):
+        shader = self.db.query(models.DBShader).filter(models.DBShader.ShaderId == shader_id).first()
+
+        shader.ShaderCode = item.ShaderCode
+        self.db.commit()
+        self.db.refresh(shader)
+        return shader
+
 
 
 
