@@ -37,7 +37,7 @@ class ShaderTags(BaseAPI):
         return self.db.query(models.DBShader).filter(models.DBShader.ShaderId == shader_id).first()
 
     @router.put("/{shader_id}", response_model=ShaderCreate)
-    def get_shader_by_id(self, shader_id: int, item: ShaderCreate):
+    def put_shader_by_id(self, shader_id: int, item: ShaderCreate):
         shader = self.db.query(models.DBShader).filter(models.DBShader.ShaderId == shader_id).first()
 
         shader.ShaderCode = item.ShaderCode
