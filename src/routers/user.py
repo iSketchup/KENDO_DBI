@@ -64,7 +64,7 @@ class UsersAPI(BaseAPI):
             raise HTTPException(status_code=404, detail="User not found")
 
         print(repr(user.passwd))
-        print(repr(request.passwd))
+        #print(repr(request.passwd))
         print(len(user.passwd))
 
         if not bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8")):
