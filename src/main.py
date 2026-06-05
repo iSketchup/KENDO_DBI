@@ -40,16 +40,24 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
+    import os
 
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=8000,
-        # *****
-        # KI-Teil
-        # Claude
-        # Prompt: Wie kann ich HTTPS in meinem FastAPI Programm einbinden?
-        ssl_keyfile="key.pem",
-        ssl_certfile="cert.pem"
-        # *****
-    )
+    # Hier prüfen wir, ob die beiden Dateien auf der Festplatte existieren
+    ssl_vorhanden = os.path.exists("key.pem") and os.path.exists("cert.pem")
+
+    if ssl_vorhanden:
+        print("SSL-Zertifikate gefunden. Es wird in den HTTPS-Modus gestartet...")
+        uvicorn.run(
+            app,
+            host="127.0.0.1",
+            port=8000,
+            ssl_keyfile="key.pem",
+            ssl_certfile="cert.pem"
+        )
+    else:
+        print("SSL-Zertifikate sind nicht vorhanden. Es wird auf HTTP-Modus umgeschaltet...")
+        uvicorn.run(
+            app,
+            host="127.0.0.1",
+            port=8000
+        )
