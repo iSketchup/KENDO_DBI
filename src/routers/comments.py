@@ -8,7 +8,7 @@ from database import get_db
 import models
 from routers.base import BaseAPI
 
-router = APIRouter(prefix="/comments", tags=["Comment"])
+router = APIRouter(prefix="/{user_id}/{shader_id}/comments", tags=["Comment"])
 
 class CommentBase(BaseModel):
     CommentText : str = Field(max_length=511)
@@ -24,7 +24,7 @@ class CommentResponse(CommentCreate):
 class Comments(BaseAPI):
     db : Session = Depends(get_db)
 
-    @router.get("/{Shader_id}", response_model=list[CommentResponse])
+    @router.get("/", response_model=list[CommentResponse])
     def comments(self, Shader_id : int):
         if self.db.query(models.DBShader).filter(Shader_id == models.DBShader.ShaderId).first() is None:
             raise HTTPException(400, "shader_id must be in shader table")

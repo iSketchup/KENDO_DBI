@@ -24,12 +24,13 @@ class TagsResponse(TagsCreate):
 @cbv(router)
 class Tags(BaseAPI):
     db : Session = Depends(get_db)
+
     @router.get("/", response_model=list[TagsResponse])
-    def get_tags(self, shader_id : int):
+    def get_tags(self):
         return self.get_or_404(self.db, models.DBShaderTags, shader_id)
 
     @router.post("/", response_model=TagsCreate)
-    def create_tag(self, item : TagsCreate):
+    def create_tag(self, item: TagsCreate):
         new = models.DBComments(**item.model_dump())
         self.db.add(new)
         self.db.commit()

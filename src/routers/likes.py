@@ -9,7 +9,7 @@ from database import get_db
 import models
 from routers.base import BaseAPI
 
-router = APIRouter(prefix="/likes", tags=["Likes"])
+router = APIRouter(prefix="/{user_id}/{shader_id}/likes", tags=["Likes"])
 
 class LikesBase(BaseModel):
     pass
@@ -17,8 +17,6 @@ class LikesBase(BaseModel):
 class LikesCreate(LikesBase):
     user_id: int
     shader_id: int
-    class Config:
-        from_attributes = True
 
 class LikesResponse(BaseModel):
     amount: int
@@ -31,7 +29,7 @@ class Likes(BaseAPI):
     api_key : str = Depends(verify_api_key)
 
     @router.get("/", response_model=LikesResponse)
-    def likes(self, shader_id: int = Query(...), user_id: int = Query(None)):
+    def likes(self, shader_id: int, user_id: int):
         amount = None
         liked_by_u = False
         if  self.db.query(models.DBShader).filter(shader_id == models.DBShader.ShaderId).first() is None:
