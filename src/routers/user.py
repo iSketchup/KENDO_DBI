@@ -4,7 +4,6 @@ from fastapi.params import Depends
 from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
-
 from database import get_db
 import models
 from routers.base import BaseAPI

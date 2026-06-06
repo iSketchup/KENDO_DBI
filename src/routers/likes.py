@@ -3,6 +3,8 @@ from fastapi.params import Depends
 from pydantic import BaseModel, field_validator, Field
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
+
+from auth import verify_api_key
 from database import get_db
 import models
 from routers.base import BaseAPI
@@ -26,6 +28,7 @@ class LikesResponse(BaseModel):
 @cbv(router)
 class Likes(BaseAPI):
     db : Session = Depends(get_db)
+    api_key : str = Depends(verify_api_key)
 
     @router.get("/", response_model=LikesResponse)
     def likes(self, shader_id: int = Query(...), user_id: int = Query(None)):
