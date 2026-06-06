@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 
 from database import engine
 import models
-from routers import user, shader, likes, comments
+from routers import user, shader, likes, comments, tags
 
 # Erstellt alle Tabellen im Datenbank Schema (falls noch nicht vorhanden)
 models.Base.metadata.create_all(bind=engine)
@@ -19,6 +19,7 @@ app.include_router(shader.router)
 app.include_router(shader.router_per_user)
 app.include_router(likes.router)
 app.include_router(comments.router)
+app.include_router(tags.router)
 # Custome valdidation Error handler
 
 @app.exception_handler(RequestValidationError)

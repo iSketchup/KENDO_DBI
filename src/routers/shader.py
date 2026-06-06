@@ -1,12 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from database import get_db
 import models
+from models import DBShader
+from routers import likes, comments, tags
 from routers.base import BaseAPI
+from routers.likes import Likes
 
 router = APIRouter(
     prefix="/shaders", tags=["Shader"])
@@ -17,7 +21,11 @@ class ShaderCreate(BaseModel):
 
 class ShaderResponse(ShaderCreate):
     ShaderId: int
-    ShaderLikes: int
+    ShaderLikes: likes.LikesResponse
+    ShaderComments: list[comments.CommentResponse]
+    ShaderTags: list[tags.TagsResponse]
+
+    model_config = ConfigDict(from_attributes=True)
 
 def populate_shaderlikes(self, shaders):
     for shader in shaders:
@@ -25,7 +33,7 @@ def populate_shaderlikes(self, shaders):
     return shaders
 
 @cbv(router)
-class ShaderTags(BaseAPI):
+class Shaders(BaseAPI):
     db : Session = Depends(get_db)
     @router.get("/", response_model=list[ShaderResponse])
     def get_all_shaders(self):
@@ -51,14 +59,14 @@ class ShaderTags(BaseAPI):
 router_per_user = APIRouter(
     prefix="/users/{user_id}/shaders", tags=["Shader"])
 @cbv(router_per_user)
-class ShadersAPI(BaseAPI):
+class ShadersUser(BaseAPI):
     db : Session = Depends(get_db)
 
 
     @router_per_user.get("/", response_model=list[ShaderResponse])
     def get_shader_by_user(self, user_id: int):
         shaders = self.db.query(models.DBShader).filter(models.DBShader.user_id == user_id).all()
-        return populate_shaderlikes(self, shaders)
+        return shaders
 
     @router_per_user.post("/", response_model=ShaderCreate)
     def new_shader(self, item: ShaderCreate, user_id: int):

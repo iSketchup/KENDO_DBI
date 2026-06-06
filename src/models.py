@@ -1,4 +1,6 @@
 from sqlalchemy import Column, Integer, String, BOOLEAN, VARCHAR, ForeignKey
+from sqlalchemy.orm import relationship
+
 from database import Base
 
 
@@ -9,12 +11,16 @@ class DBUsers(Base):
     UserName = Column(String(31) , unique=True ,index=True)
     passwd = Column(String)
 
+    shaders = relationship("DBShader", back_populates="user")
+
 
 class DBShader(Base):
     __tablename__ = "Shaders"
     ShaderId = Column(Integer, primary_key=True)
     ShaderCode = Column(String, index=True)
     user_id = Column(Integer, ForeignKey("Users.UserId"))
+
+    user = relationship("DBUsers", back_populates="shaders")
 
 
 class DBComments(Base):
@@ -24,13 +30,12 @@ class DBComments(Base):
     user_id = Column(Integer, ForeignKey("Users.UserId"))
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
 
-class ShaderTags(Base):
+class DBShaderTags(Base):
     __tablename__ = "ShaderTags"
     ShaderTagsID = Column(Integer, primary_key=True)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
     tag_id = Column(Integer, ForeignKey("Tags.TagId"))
-
-class Tags(Base):
+class DBTags(Base):
     __tablename__ = "Tags"
     TagId = Column(Integer, primary_key=True)
     TagName = Column(String(31) ,unique=True, index=True)
@@ -40,4 +45,3 @@ class DBLikes(Base):
     LikeId = Column(Integer, primary_key=True)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
     user_id = Column(Integer, ForeignKey("Users.UserId"))
-    relationship_table = {"Shaders":shader_id, "Users":user_id}
