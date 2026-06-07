@@ -91,13 +91,12 @@ class UsersAPI(BaseAPI):
 
 
     @router.put("/", response_model=UserResponse)
-    def change_user(self, item: UserCreate, item_id: int):
+    def change_user(self, item: UserCreate, username: str):
 
         # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
         existing = (self.db.query(models.DBUsers).filter
                     (
-                        models.DBUsers.UserName == item.UserName,
-                        models.DBUsers.UserId != item.UserId
+                        models.DBUsers.UserName == item.UserName
                      ).first())
 
         if existing:
@@ -105,10 +104,10 @@ class UsersAPI(BaseAPI):
                                                         "mit gleichen Namen zu erstellen")
 
 
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
+            raise HTTPException(status_code=404, detail=f"Der User mit der ID: {username}"
                                                         f" wurde nicht gefunden")
 
         user.UserName = item.UserName
@@ -120,11 +119,11 @@ class UsersAPI(BaseAPI):
 
 
     @router.delete("/", status_code=204)
-    def del_user(self, item_id: int):
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item_id).first()
+    def del_user(self, username: str):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
 
         if not user:
-            raise HTTPException(status_code=404, detail=f"Der User mit der ID: {item_id}"
+            raise HTTPException(status_code=404, detail=f"Der User mit dem Namen: {username}"
                                                         f" wurde nicht gefunden")
         self.db.delete(user)
         self.db.commit()
