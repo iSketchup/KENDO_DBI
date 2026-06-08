@@ -17,6 +17,7 @@ class DBUsers(Base):
 class DBShader(Base):
     __tablename__ = "Shaders"
     ShaderId = Column(Integer, primary_key=True)
+    ShaderName = Column(String(63) , unique=True, index=True)
     ShaderCode = Column(String, index=True)
     user_id = Column(Integer, ForeignKey("Users.UserId"))
 
@@ -45,3 +46,9 @@ class DBLikes(Base):
     LikeId = Column(Integer, primary_key=True)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
     user_id = Column(Integer, ForeignKey("Users.UserId"))
+
+class DBtextures(Base):
+    __tablename__ = "Textures"
+    TextureId = Column(Integer, primary_key=True)
+    TexturePath = Column(String)
+    shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
