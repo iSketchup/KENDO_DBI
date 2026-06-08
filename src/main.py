@@ -42,24 +42,16 @@ def root():
 if __name__ == "__main__":
     import uvicorn
     import os
+    from sslmake import create_ssl
 
     # Hier prüfen wir, ob die beiden Dateien auf der Festplatte existieren
     ssl_vorhanden = os.path.exists("key.pem") and os.path.exists("cert.pem")
 
 
     # TODO: Zertifikat erzeugen, falls keines vorhanden ist via os
-    if (not ssl_vorhanden):
-        created_ssl = os.system(
-            r'"C:\Program Files\OpenSSL-Win64\bin\openssl.exe"'
-            r' req -x509 -newkey rsa:4096 -keyout key.pem -out'
-            r' cert.pem -days 365 -nodes')
-
-        if (created_ssl == 0):
-            print("Zertifikat erstellt")
-            ssl_vorhanden = True
-        else:
-            print("Fehler")
-
+    if not ssl_vorhanden:
+        create_ssl() # Das SSL erzeugen.
+        ssl_vorhanden = os.path.exists("key.pem") and os.path.exists("cert.pem")
 
     if ssl_vorhanden:
         print("SSL-Zertifikate gefunden. Es wird in den HTTPS-Modus gestartet...")
