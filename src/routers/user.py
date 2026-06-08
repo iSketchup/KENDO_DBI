@@ -55,6 +55,14 @@ class UsersAPI(BaseAPI):
     def users(self):
         return self.db.query(models.DBUsers).all()
 
+
+    @router.get("/{username}", response_model=UserResponse)
+    def usernames(self, username : str):
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
+
+        return user
+
+
     @router.post("/login", response_model=UserResponse)
     def login(self, request: LoginRequest):
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == request.UserName).first()
