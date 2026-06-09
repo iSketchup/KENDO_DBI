@@ -99,9 +99,30 @@ class Shaders(BaseAPI):
         self.db.refresh(shader)
         return shader
 
-    @router.get("/by_user={shader_user_id}", response_model=list[ShaderResponse])
-    def get_shader_by_user(self, shader_user_id: int):
-        return self.db.query(models.DBShader).filter(DBShader.user_id == shader_user_id).all()
+    @router.get("/by_user/{shader_user_id}", response_model=list[ShaderResponse])
+    def get_shader_by_user(self,user_id:int ,shader_user_id: int):
+        all_shaders = self.db.query(models.DBShader).filter(DBShader.user_id == shader_user_id).all()
+        results = []
+        for shader in all_shaders:
+            liked_by_user = False
+            like_amount = self.db.query(models.DBLikes).filter(models.DBLikes.shader_id == shader.ShaderId).count()
+
+            if self.db.query(models.DBLikes).filter(models.DBLikes.shader_id == shader.ShaderId,
+                                                    models.DBLikes.user_id == user_id, ).first() is not None:
+                liked_by_user = True
+
+            shader_tags = self.db.query(models.DBTags).join(models.DBShaderTags,
+                                                            models.DBShaderTags.tag_id == models.DBTags.TagId).filter(
+                models.DBShaderTags.shader_id == shader.ShaderId).all()
+
+            results.append({
+                "ShaderName": shader.ShaderCode,
+                "ShaderCode": shader.ShaderName,
+                "user_id": user_id,
+                "ShaderId": shader.ShaderId,
+                "ShaderTags": shader_tags,
+                "ShaderLikes": {"amount": like_amount, "liked_by_u": liked_by_user}, })
+        return results
 
     @router.post("/", response_model=ShaderCreate)
     def create_shader(self, user_id:int, shader_code:str, shader_name:str):
