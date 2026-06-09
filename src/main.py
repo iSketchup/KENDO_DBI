@@ -16,7 +16,6 @@ app = FastAPI(title="myApp", description="myApp", version="1.0.0")
 
 app.include_router(user.router)
 app.include_router(shader.router)
-app.include_router(shader.router_per_user)
 app.include_router(likes.router)
 app.include_router(comments.router)
 app.include_router(tags.router)
