@@ -26,7 +26,7 @@ class LikesResponse(BaseModel):
 @cbv(router)
 class Likes(BaseAPI):
     db : Session = Depends(get_db)
-    api_key : str = Depends(verify_api_key)
+    #api_key : str = Depends(verify_api_key)
 
     @router.get("/", response_model=LikesResponse)
     def likes(self, shader_id: int, user_id: int):

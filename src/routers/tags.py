@@ -5,6 +5,7 @@ from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+from models import DBTags, DBShader
 from routers.base import BaseAPI
 
 router = APIRouter(prefix="/tags", tags=["Tags"])
@@ -14,12 +15,14 @@ class TagsBase(BaseModel):
 
 class TagsCreate(TagsBase):
     TagName: str = Field(max_length=31)
-    class Config:
-        from_attributes = True
 
 class TagsResponse(TagsCreate):
-    tag_id: int
+    TagId: int
 
+class ShaderTagsResponse(BaseModel):
+    tag_id:int
+    shader_id:int
+    user_id:int
 
 @cbv(router)
 class Tags(BaseAPI):
@@ -27,11 +30,12 @@ class Tags(BaseAPI):
 
     @router.get("/", response_model=list[TagsResponse])
     def get_tags(self):
-        return self.get_or_404(self.db, models.DBShaderTags, shader_id)
+        return self.db.query(models.DBTags).all()
 
-    @router.post("/", response_model=TagsCreate)
-    def create_tag(self, item: TagsCreate):
-        new = models.DBComments(**item.model_dump())
+
+    @router.post("/", response_model=TagsResponse)
+    def create_tag(self, item:TagsCreate):
+        new = models.DBTags(**item.model_dump())
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)

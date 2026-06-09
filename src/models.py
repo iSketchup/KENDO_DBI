@@ -10,17 +10,15 @@ class DBUsers(Base):
     UserId = Column(Integer, primary_key=True)
     UserName = Column(String(31) , unique=True ,index=True)
     passwd = Column(String)
-
     shaders = relationship("DBShader", back_populates="user")
 
 
 class DBShader(Base):
     __tablename__ = "Shaders"
     ShaderId = Column(Integer, primary_key=True)
-    ShaderName = Column(String(63) , unique=True, index=True)
+    ShaderName = Column(String(63) , index=True)
     ShaderCode = Column(String, index=True)
     user_id = Column(Integer, ForeignKey("Users.UserId"))
-
     user = relationship("DBUsers", back_populates="shaders")
 
 
@@ -36,6 +34,8 @@ class DBShaderTags(Base):
     ShaderTagsID = Column(Integer, primary_key=True)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
     tag_id = Column(Integer, ForeignKey("Tags.TagId"))
+    user_id = Column(Integer, ForeignKey("Users.UserId"))
+
 class DBTags(Base):
     __tablename__ = "Tags"
     TagId = Column(Integer, primary_key=True)
