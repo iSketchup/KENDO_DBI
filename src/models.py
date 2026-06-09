@@ -47,8 +47,10 @@ class DBLikes(Base):
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
     user_id = Column(Integer, ForeignKey("Users.UserId"))
 
-class DBtextures(Base):
+
+class DBTextures(Base):
     __tablename__ = "Textures"
     TextureId = Column(Integer, primary_key=True)
     TexturePath = Column(String)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
+

@@ -16,6 +16,10 @@ from routers.likes import Likes
 router = APIRouter(prefix="/{user_id}/shaders", tags=["Shader"])
 
 
+class TextureResponse(BaseModel):
+    TextureId: int
+    TexturePath: str
+
 class ShaderCreate(BaseModel):
     ShaderCode: str
     ShaderName: str
@@ -27,6 +31,7 @@ class ShaderResponse(ShaderCreate):
     ShaderId: int
     ShaderTags: list[tags.TagsResponse]
     ShaderLikes: likes.LikesResponse
+    ShadersTextures: list[TextureResponse] ## maybe passt so
     model_config = ConfigDict(from_attributes=True)
 
 class SingleShaderResponse(ShaderResponse):
@@ -49,12 +54,15 @@ class Shaders(BaseAPI):
         shader_tags = self.db.query(models.DBTags).join(models.DBShaderTags,
                                                         models.DBShaderTags.tag_id == models.DBTags.TagId).filter(
             models.DBShaderTags.shader_id == shader_id).all()
-        shader = self.db.query(models.DBShader).filter(DBShader.ShaderId == shader_id).first()
+
+        shader = self.db.query(DBShader).filter(DBShader.ShaderId == shader_id).first()
+
+        textures = self.db.query(models.DBTextures).filter(models.DBTextures.shader_id == shader_id).all()
 
         return {
             "ShaderId": shader_id,
-            "ShaderCode": shader.ShaderCode,
             "ShaderName": shader.ShaderName,
+            "ShaderCode": shader.ShaderCode,
             "user_id": shader.user_id,
             "ShaderLikes": {
                 "amount": like_amount,
@@ -62,6 +70,7 @@ class Shaders(BaseAPI):
             },
             "ShaderComments": shader_comments,
             "ShaderTags": shader_tags,
+            "ShadersTextures": textures,
         }
 
     @router.get("/", response_model=list[ShaderResponse])
@@ -79,13 +88,19 @@ class Shaders(BaseAPI):
                                                             models.DBShaderTags.tag_id == models.DBTags.TagId).filter(
                 models.DBShaderTags.shader_id == shader.ShaderId).all()
 
+            textures = self.db.query(models.DBTextures).filter(models.DBTextures.shader_id == shader.ShaderId).all()
+
             results.append({
-            "ShaderName": shader.ShaderCode,
-            "ShaderCode": shader.ShaderName,
+            "ShaderName": shader.ShaderName,
+            "ShaderCode": shader.ShaderCode,
             "user_id": user_id,
             "ShaderId": shader.ShaderId,
             "ShaderTags": shader_tags,
-            "ShaderLikes": {"amount": like_amount,"liked_by_u": liked_by_user},})
+            "ShaderLikes": {"amount": like_amount,"liked_by_u": liked_by_user},
+            "ShadersTextures": textures,
+            })
+
+
         return results
 
 
@@ -115,13 +130,20 @@ class Shaders(BaseAPI):
                                                             models.DBShaderTags.tag_id == models.DBTags.TagId).filter(
                 models.DBShaderTags.shader_id == shader.ShaderId).all()
 
+
+            textures = self.db.query(models.DBTextures).filter(models.DBTextures.shader_id == shader.ShaderId).all()
+
+
             results.append({
-                "ShaderName": shader.ShaderCode,
-                "ShaderCode": shader.ShaderName,
+                "ShaderName": shader.ShaderName,
+                "ShaderCode": shader.ShaderCode,
                 "user_id": user_id,
                 "ShaderId": shader.ShaderId,
                 "ShaderTags": shader_tags,
-                "ShaderLikes": {"amount": like_amount, "liked_by_u": liked_by_user}, })
+                "ShaderLikes": {"amount": like_amount, "liked_by_u": liked_by_user},
+                "ShadersTextures": textures,
+            })
+
         return results
 
     @router.post("/", response_model=ShaderCreate)
@@ -143,4 +165,18 @@ class Shaders(BaseAPI):
     @router.get("/shadertag")
     def get_tags_by_id(self, shader_id: int, ):
         return self.db.query(models.DBTags).join(models.DBShader).filter(DBShader.ShaderId == shader_id).all()
+
+
+    @router.post("/{shader_id}/shadertexture")
+    def create_shadertextures(self,shader_id:int, Path:str,):
+        new = models.DBTextures( shader_id = shader_id, TexturePath=Path)
+        self.db.add(new)
+        self.db.commit()
+        self.db.refresh(new)
+        return new
+
+    @router.get("/{shader_id}/shadertexture")
+    def get_textures_by_id(self, shader_id: int, ):
+        return self.db.query(models.DBTextures).join(models.DBShader).filter(DBShader.ShaderId == shader_id).all()
+
 
