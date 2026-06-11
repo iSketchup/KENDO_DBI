@@ -109,7 +109,7 @@ class UsersAPI(BaseAPI):
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {username}"
                                                         f" wurde nicht gefunden")
 
-
+#
         new_username = item.UserName if item.UserName else user.UserName
         new_passwd = item.passwd if item.passwd else user.passwd
 
