@@ -23,7 +23,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 class UserCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     UserName: str = Field(..., min_length=1, max_length=31, alias="UserName") # Hier wird eine Alias für das JSON gesetzt
-    passwd: str = Field(..., min_length=8)
+    passwd: str
 
     @field_validator("UserName")
     @classmethod
@@ -33,10 +33,12 @@ class UserCreate(BaseModel):
         else:
             raise ValueError("Name must not contain whitespaces")
 
+
 # Response-Klasse für das Login
 class LoginRequest(BaseModel):
     UserName: str
     passwd: str
+
 
 class UserResponse(UserCreate):
     UserId: int
@@ -70,13 +72,8 @@ class UsersAPI(BaseAPI):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        print(repr(user.passwd))
-        #print(repr(request.passwd))
-        print(len(user.passwd))
 
-
-
-        ## ToDo: daa auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
+        ## ToDo: da auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
 
         if not bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8")):
             raise HTTPException(status_code=401, detail="Login is invalid")
@@ -88,11 +85,12 @@ class UsersAPI(BaseAPI):
     def new_user(self, item: UserCreate):
         # Hier wird nachgeschaut, ob ein User mit diesen Namen schon vorhanden ist.
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.UserName).first()
-        #hashed_pw = self.password_hashing(user.passwd)
+
 
         if user:
             raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
                                                         "mit gleichen Namen zu erstellen")
+
 
         newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
         self.db.add(newuser)
@@ -104,26 +102,28 @@ class UsersAPI(BaseAPI):
 
     @router.put("/", response_model=UserResponse)
     def change_user(self, item: UserCreate, username: str):
-
-        # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
-        existing = (self.db.query(models.DBUsers).filter
-                    (
-                        models.DBUsers.UserName == item.UserName
-                     ).first())
-
-        if existing:
-            raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
-                                                        "mit gleichen Namen zu erstellen")
-
-
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
+        # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
 
         if not user:
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {username}"
                                                         f" wurde nicht gefunden")
 
-        user.UserName = item.UserName
-        user.passwd = item.passwd
+
+        new_username = item.UserName if item.UserName else user.UserName
+        new_passwd = item.passwd if item.passwd else user.passwd
+
+        if user.UserName != new_username:
+            existing = (self.db.query(models.DBUsers)
+                        .filter(models.DBUsers.UserName == new_username).first())
+            if existing:
+                raise HTTPException(status_code=409, detail="Users with the same name"
+                                                            " are not permitted")
+
+
+
+        user.UserName = new_username
+        user.passwd = new_passwd
 
         self.db.commit()
         self.db.refresh(user)
