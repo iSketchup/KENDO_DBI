@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 import models
-from models import DBShader
+from models import DBShader, DBTextures
 from routers import likes, comments, tags
 from routers.base import BaseAPI
 from routers.likes import Likes
@@ -24,6 +24,7 @@ class ShaderCreate(BaseModel):
     ShaderCode: str
     ShaderName: str
     user_id: int
+
 
 
 class ShaderResponse(ShaderCreate):
@@ -216,34 +217,27 @@ class Shaders(BaseAPI):
         return self._get_shader_tags(shader_id)
 
     @router.post("/{shader_id}/shadertexture")
-    def create_shadertextures(self, shader_id: int, Path: str):
-        shader = (
-            self.db.query(models.DBShader)
-            .filter(models.DBShader.ShaderId == shader_id)
-            .first()
-        )
-
-        if shader is None:
-            raise HTTPException(status_code=404, detail="Shader not found")
-
-        new = models.DBTextures(
-            shader_id=shader_id,
-            TexturePath=Path,
-        )
-
+    def create_shadertextures(self,shader_id:int, Encoded:str,):
+        new = models.DBTextures( shader_id = shader_id, Texture64=Encoded)
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
 
         return new
 
-    @router.get("/{shader_id}/shadertexture", response_model=list[TextureResponse])
-    def get_textures_by_id(self, shader_id: int):
-        shader = (
-            self.db.query(models.DBShader)
-            .filter(models.DBShader.ShaderId == shader_id)
-            .first()
-        )
+    @router.put("/{shader_id}/shadertexture/{TextureId}")
+    def put_shadertextures(self, shader_id: int, TextureId: int,Encoded: str, ):
+        Tex = self.get_or_404(self,self.db, DBTextures, TextureId)
+
+        Tex.Texture64 = Encoded
+
+        self.db.commit()
+        self.db.refresh(Tex)
+        return Tex
+
+    @router.get("/{shader_id}/shadertexture")
+    def get_textures_by_id(self, shader_id: int, ):
+        return self.db.query(models.DBTextures).join(models.DBShader).filter(DBShader.ShaderId == shader_id).all()
 
         if shader is None:
             raise HTTPException(status_code=404, detail="Shader not found")
