@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from pydantic import ValidationError
 from fastapi.exceptions import RequestValidationError
 from fastapi import Request
 from starlette import status
 from starlette.responses import JSONResponse
+
 
 from database import engine
 import models

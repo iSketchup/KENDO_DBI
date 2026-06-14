@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 import models
-from models import DBShader
+from models import DBShader, DBTextures
 from routers import likes, comments, tags
 from routers.base import BaseAPI
 from routers.likes import Likes
@@ -168,12 +168,22 @@ class Shaders(BaseAPI):
 
 
     @router.post("/{shader_id}/shadertexture")
-    def create_shadertextures(self,shader_id:int, Path:str,):
-        new = models.DBTextures( shader_id = shader_id, TexturePath=Path)
+    def create_shadertextures(self,shader_id:int, Encoded:str,):
+        new = models.DBTextures( shader_id = shader_id, Texture64=Encoded)
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
         return new
+
+    @router.put("/{shader_id}/shadertexture/{TextureId}")
+    def put_shadertextures(self, shader_id: int, TextureId: int,Encoded: str, ):
+        Tex = self.get_or_404(self,self.db, DBTextures, TextureId)
+
+        Tex.Texture64 = Encoded
+
+        self.db.commit()
+        self.db.refresh(Tex)
+        return Tex
 
     @router.get("/{shader_id}/shadertexture")
     def get_textures_by_id(self, shader_id: int, ):
