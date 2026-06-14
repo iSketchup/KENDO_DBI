@@ -17,13 +17,18 @@ router = APIRouter(prefix="/{user_id}/shaders", tags=["Shader"])
 
 
 class TextureResponse(BaseModel):
-    TextureId: int
-    TexturePath: str
+    id: int
+    Texture64: str
+
 
 class ShaderCreate(BaseModel):
     ShaderCode: str
     ShaderName: str
     user_id: int
+
+
+class ShaderUpdate(ShaderCreate):
+    ShaderTextures: list[TextureResponse]
 
 
 
@@ -78,6 +83,8 @@ class Shaders(BaseAPI):
             "liked_by_u": liked_by_user,
         }
 
+
+
     def _serialize_shader(self, shader: DBShader, user_id: int, include_comments: bool = False) -> dict:
         textures = (
             self.db.query(models.DBTextures)
@@ -123,7 +130,9 @@ class Shaders(BaseAPI):
         return [self._serialize_shader(shader, user_id) for shader in all_shaders]
 
     @router.put("/{shader_id}", response_model=ShaderCreate)
-    def put_shader_by_id(self, shader_id: int, user_id: int, shaderCode: str, shaderName: str):
+    def put_shader_by_id(self, shader_id: int, user_id: int, item : ShaderUpdate):
+
+
         shader = (
             self.db.query(models.DBShader)
             .filter(models.DBShader.ShaderId == shader_id)
@@ -136,8 +145,16 @@ class Shaders(BaseAPI):
         if shader.user_id != user_id:
             raise HTTPException(status_code=403, detail="Only the shader creator can edit this shader")
 
-        shader.ShaderCode = shaderCode
-        shader.ShaderName = shaderName
+        shader.ShaderCode = item.ShaderCode
+        shader.ShaderName = item.ShaderName
+
+        self.db.query(models.DBTextures).filter(models.DBTextures.shader_id == shader_id).delete()
+
+
+        for i in item.ShaderTextures:
+            self.create_shadertextures(shader_id, i.Texture64)
+
+
 
         self.db.commit()
         self.db.refresh(shader)
@@ -227,7 +244,7 @@ class Shaders(BaseAPI):
 
     @router.put("/{shader_id}/shadertexture/{TextureId}")
     def put_shadertextures(self, shader_id: int, TextureId: int,Encoded: str, ):
-        Tex = self.get_or_404(self,self.db, DBTextures, TextureId)
+        Tex = self.get_or_404(self.db, DBTextures, TextureId)
 
         Tex.Texture64 = Encoded
 
@@ -237,7 +254,10 @@ class Shaders(BaseAPI):
 
     @router.get("/{shader_id}/shadertexture")
     def get_textures_by_id(self, shader_id: int, ):
-        return self.db.query(models.DBTextures).join(models.DBShader).filter(DBShader.ShaderId == shader_id).all()
+        shader = (
+                self.db.query(models.DBShader)
+                  .filter(DBShader.ShaderId == shader_id).first()
+            )
 
         if shader is None:
             raise HTTPException(status_code=404, detail="Shader not found")
