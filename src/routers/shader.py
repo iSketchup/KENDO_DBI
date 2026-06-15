@@ -38,7 +38,7 @@ class ShaderResponse(ShaderCreate):
     ShaderId: int
     ShaderTags: list[str]
     ShaderLikes: likes.LikesResponse
-    ShadersTextures: list[TextureResponse]
+    ShaderTextures: list[TextureResponse]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -101,7 +101,7 @@ class Shaders(BaseAPI):
             "ShaderId": shader.ShaderId,
             "ShaderTags": self._get_shader_tags(shader.ShaderId),
             "ShaderLikes": self._get_shader_likes(shader.ShaderId, user_id),
-            "ShadersTextures": textures,
+            "ShaderTextures": textures,
         }
 
         if include_comments:
