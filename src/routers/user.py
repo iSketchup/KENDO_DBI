@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 from routers.base import BaseAPI
+from auth import verify_api_key
 
 from passlib.context import CryptContext # Bibliothek für das Hashing
 
@@ -52,6 +53,7 @@ class UserResponse(UserCreate):
 class UsersAPI(BaseAPI):
     db: Session = Depends(get_db)
 
+    api_key: str = Depends(verify_api_key)
 
     @router.get("/", response_model=list[UserResponse])
     def users(self):
@@ -109,7 +111,7 @@ class UsersAPI(BaseAPI):
             raise HTTPException(status_code=404, detail=f"Der User mit der ID: {username}"
                                                         f" wurde nicht gefunden")
 
-#
+
         new_username = item.UserName if item.UserName else user.UserName
         new_passwd = item.passwd if item.passwd else user.passwd
 
