@@ -197,3 +197,6 @@ $RECYCLE.BIN/
 # Linux
 *~
 /meine_app.db
+/src/cert.pem
+/src/key.pem
+/src/meine_app.db
