@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, responses
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, responses, Query
 from fastapi.params import Depends
 from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
@@ -161,15 +163,23 @@ class Shaders(BaseAPI):
 
         return shader
 
-    @router.get("/by_user/{shader_user_id}", response_model=list[ShaderResponse])
-    def get_shader_by_user(self, user_id: int, shader_user_id: int):
-        all_shaders = (
-            self.db.query(models.DBShader)
-            .filter(DBShader.user_id == shader_user_id)
-            .all()
-        )
+    @router.get("/filter/", response_model=list[ShaderResponse])
+    def get_by_filters(self, user_id:int, shader_user_id: Optional[int] = Query(None), shader_name: Optional[str] = Query(None),tags: Optional[list[str]] = Query(None)):
+        result = self.db.query(models.DBShader)
 
-        return [self._serialize_shader(shader, user_id) for shader in all_shaders]
+        if shader_user_id is not None:
+            result = result.filter(models.DBShader.user_id == shader_user_id)
+        if shader_name is not None:
+            result = result.filter(models.DBShader.ShaderName.ilike(f"%{shader_name}%"))
+        if tags is not None:
+            result = (
+            result.join(models.DBShaderTags, models.DBShaderTags.shader_id == models.DBShader.ShaderId)
+            .join(models.DBTags, models.DBTags.TagId == models.DBShaderTags.tag_id)
+            .filter(models.DBTags.TagName.in_(tags))
+            .distinct()
+            )
+
+        return [self._serialize_shader(shader, user_id) for shader in result]
 
     @router.post("/", response_model=ShaderCreate)
     def create_shader(self, user_id: int, shader_code: str, shader_name: str):
