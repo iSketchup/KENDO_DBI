@@ -75,8 +75,6 @@ class AdminAPI(BaseAPI):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if not user.is_admin:
-            raise HTTPException(status_code=403, detail="Keine Admin-Rechte")
 
         ## ToDo: da auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
 
