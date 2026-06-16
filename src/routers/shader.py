@@ -22,11 +22,12 @@ class TextureResponse(BaseModel):
     id: int
     Texture64: str
 
-
-class ShaderCreate(BaseModel):
-    ShaderCode: str
-    ShaderName: str
+class ShaderBlank(BaseModel):
     user_id: int
+    ShaderName: str
+
+class ShaderCreate(ShaderBlank):
+    ShaderCode: str
 
 
 class ShaderUpdate(ShaderCreate):
@@ -194,6 +195,26 @@ class Shaders(BaseAPI):
         self.db.refresh(new)
 
         return new
+
+
+    @router.post("/new", response_model=SingleShaderResponse)
+    def create_blank_shader(self, user_id: int, input: ShaderCreate):
+
+        base_shader = """#version 330 core\n\nout vec4 outputColor;\n\nin vec2 TexCoord;\n\nuniform float uTime;\n\nvec3 hsvToRgb(vec3 c)\n{\n    vec3 p = abs(fract(c.xxx + vec3(0.0, 2.0/3.0, 1.0/3.0)) * 6.0 - 3.0);\n    return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);\n}\n\nvoid main()\n{\n    vec2 uv = TexCoord;\n\n    float diagonal = (uv.x + uv.y) * 0.5;\n\n    float hue = fract(diagonal + uTime * 0.15);\n\n    vec3 color = hsvToRgb(vec3(hue, 1.0, 1.0));\n\n    outputColor = vec4(color, 1.0);\n}
+        """
+
+        new = models.DBShader(
+            user_id=user_id,
+            ShaderCode=base_shader,
+            ShaderName=input.ShaderName,
+        )
+
+
+        self.db.add(new)
+        self.db.commit()
+        self.db.refresh(new)
+
+        return self._serialize_shader(new, user_id, True)
 
     @router.post("/shadertag", response_model=tags.ShaderTagsResponse)
     def create_shadertag(self, tag_id: int, user_id: int, shader_id: int):
