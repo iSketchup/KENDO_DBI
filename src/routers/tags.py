@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
@@ -18,6 +18,7 @@ class TagsCreate(TagsBase):
 
 class TagsResponse(TagsCreate):
     TagId: int
+    model_config = ConfigDict(from_attributes=True)
 
 class ShaderTagsResponse(BaseModel):
     tag_id:int
@@ -32,13 +33,25 @@ class Tags(BaseAPI):
     def get_tags(self):
         return self.db.query(models.DBTags).all()
 
+    @router.get("/{tag_id}", response_model=TagsResponse)
+    def get_tag(self, tag_id: int):
+        tag = self.db.query(models.DBTags).filter(models.DBTags.TagId == tag_id).first()
+        if tag is None:
+            raise HTTPException(status_code=404, detail="Tag not found")
+        return tag
 
     @router.post("/", response_model=TagsResponse)
-    def create_tag(self, item:TagsCreate):
+    def create_tag(self, item: TagsCreate):
         new = models.DBTags(**item.model_dump())
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
         return new
 
-
+    @router.delete("/{tag_id}", status_code=204)
+    def delete_tag(self, tag_id: int):
+        tag = self.db.query(models.DBTags).filter(models.DBTags.TagId == tag_id).first()
+        if tag is None:
+            raise HTTPException(status_code=404, detail="Tag not found")
+        self.db.delete(tag)
+        self.db.commit()

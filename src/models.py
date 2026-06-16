@@ -27,6 +27,7 @@ class DBComments(Base):
     __tablename__ = "Comments"
     CommentId = Column(Integer, primary_key=True)
     CommentText = Column(String(255))
+    CommentAuthor = Column(String)
     user_id = Column(Integer, ForeignKey("Users.UserId"))
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
 

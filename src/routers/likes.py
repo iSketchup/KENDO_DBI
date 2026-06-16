@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 
@@ -17,11 +17,11 @@ class LikesBase(BaseModel):
 class LikesCreate(LikesBase):
     user_id: int
     shader_id: int
+    model_config = ConfigDict(from_attributes=True)
 
 class LikesResponse(BaseModel):
     amount: int
     liked_by_u: bool
-
 
 @cbv(router)
 class Likes(BaseAPI):
