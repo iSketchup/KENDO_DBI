@@ -43,6 +43,7 @@ class LoginRequest(BaseModel):
 
 class AdminResponse(AdminCreate):
     UserId: int
+    is_admin: bool
 
     class ConfigDict:
         from_attributes = True
@@ -94,6 +95,15 @@ class AdminAPI(BaseAPI):
         if user:
             raise HTTPException(status_code=409, detail="Es ist nicht erlaubt User"
                                                         "mit gleichen Namen zu erstellen")
+
+        existing_admin_count = self.db.query(models.DBUsers).filter(models.DBUsers.is_admin == True).count()
+
+        # Wenn bereits ein Admin existiert, wird das Erstellen verweigert!
+        if existing_admin_count >= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Es ist bereits ein Administrator im System registriert. Es darf nur einen geben!"
+            )
 
 
         newuser = models.DBUsers(UserName=item.AdminName, passwd=item.passwd, is_admin = True)
