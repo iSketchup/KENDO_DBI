@@ -43,6 +43,7 @@ class LoginRequest(BaseModel):
 
 class UserResponse(UserCreate):
     UserId: int
+    is_admin: bool
 
     class ConfigDict:
         from_attributes = True
