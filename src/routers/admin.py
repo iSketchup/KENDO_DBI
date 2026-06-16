@@ -16,17 +16,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 
-router = APIRouter(prefix="/user", tags=["User"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 
 
-class UserCreate(BaseModel):
+class AdminCreate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
-    UserName: str = Field(..., min_length=1, max_length=31, alias="UserName") # Hier wird eine Alias für das JSON gesetzt
+    AdminName: str = Field(..., min_length=1, max_length=31, alias="UserName") # Hier wird eine Alias für das JSON gesetzt
     passwd: str
 
-    @field_validator("UserName")
+    @field_validator("AdminName")
     @classmethod
     def name_with_whitespace(cls, value:str):
         if not ' ' in value:
@@ -37,11 +37,11 @@ class UserCreate(BaseModel):
 
 # Response-Klasse für das Login
 class LoginRequest(BaseModel):
-    UserName: str
+    AdminName: str
     passwd: str
 
 
-class UserResponse(UserCreate):
+class AdminResponse(AdminCreate):
     UserId: int
 
     class ConfigDict:
@@ -50,22 +50,26 @@ class UserResponse(UserCreate):
 
 
 @cbv(router)
-class UsersAPI(BaseAPI):
+class AdminAPI(BaseAPI):
     db: Session = Depends(get_db)
 
     api_key: str = Depends(verify_api_key)
 
+    @router.get("/", response_model=list[AdminResponse])
+    def users(self):
+        return self.db.query(models.DBUsers).all()
 
-    @router.get("/{username}", response_model=UserResponse)
+
+    @router.get("/{username}", response_model=AdminResponse)
     def usernames(self, username : str):
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
 
         return user
 
 
-    @router.post("/login", response_model=UserResponse)
+    @router.post("/login", response_model=AdminResponse)
     def login(self, request: LoginRequest):
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == request.UserName).first()
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == request.AdminName).first()
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -81,10 +85,10 @@ class UsersAPI(BaseAPI):
         return user
 
 
-    @router.post("/", response_model=UserResponse)
-    def new_user(self, item: UserCreate):
+    @router.post("/", response_model=AdminResponse)
+    def new_user(self, item: AdminCreate):
         # Hier wird nachgeschaut, ob ein User mit diesen Namen schon vorhanden ist.
-        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.UserName).first()
+        user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == item.AdminName).first()
 
 
         if user:
@@ -92,7 +96,7 @@ class UsersAPI(BaseAPI):
                                                         "mit gleichen Namen zu erstellen")
 
 
-        newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
+        newuser = models.DBUsers(UserName=item.AdminName, passwd=item.passwd, is_admin = True)
         self.db.add(newuser)
         self.db.commit()
         self.db.refresh(newuser)
@@ -100,8 +104,8 @@ class UsersAPI(BaseAPI):
         # Muss zurückgegeben werden, damit der Validationhandler es auch validieren kann.
 
 
-    @router.put("/", response_model=UserResponse)
-    def change_user(self, item: UserCreate, username: str):
+    @router.put("/", response_model=AdminResponse)
+    def change_user(self, item: AdminCreate, username: str):
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
         # Boolsche Flag um zu prüfen ob man nur sein Passwort verändern möchte
 
@@ -110,7 +114,7 @@ class UsersAPI(BaseAPI):
                                                         f" wurde nicht gefunden")
 
 
-        new_username = item.UserName if item.UserName else user.UserName
+        new_username = item.AdminName if item.AdminName else user.UserName
         new_passwd = item.passwd if item.passwd else user.passwd
 
         if user.UserName != new_username:

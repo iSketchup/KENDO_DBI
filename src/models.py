@@ -10,6 +10,7 @@ class DBUsers(Base):
     UserId = Column(Integer, primary_key=True)
     UserName = Column(String(31) , unique=True ,index=True)
     passwd = Column(String)
+    is_admin = Column(BOOLEAN, default=False)
     shaders = relationship("DBShader", back_populates="user")
 
 
