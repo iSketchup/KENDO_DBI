@@ -59,7 +59,7 @@ if __name__ == "__main__":
         print("SSL-Zertifikate gefunden. Es wird in den HTTPS-Modus gestartet...")
         uvicorn.run(
             app,
-            host="127.0.0.1",
+            host="127.0.0.12",
             port=8000,
             ssl_keyfile="key.pem",
             ssl_certfile="cert.pem"
