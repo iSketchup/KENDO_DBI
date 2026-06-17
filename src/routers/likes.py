@@ -46,18 +46,20 @@ class Likes(BaseAPI):
         return {"amount": amount, "liked_by_u": liked_by_u}
 
     @router.post("/", response_model=LikesCreate)
-    def new_like(self, item: LikesCreate):
-        if self.db.query(models.DBLikes).filter(item.shader_id == models.DBLikes.shader_id, item.user_id == models.DBLikes.user_id).first() is not None:
-            self.delete_like(item)
-        if self.db.query(models.DBShader).filter(item.shader_id == models.DBShader.ShaderId).first() is None:
+    def new_like(self, user_id: int, shader_id :int):
+        if self.db.query(models.DBShader).filter(shader_id == models.DBShader.ShaderId).first() is None:
             raise HTTPException(400, "shader_id must be in shader table")
-        if self.db.query(models.DBUsers).filter(item.user_id == models.DBUsers.UserId).first() is None:
+        if self.db.query(models.DBUsers).filter(user_id == models.DBUsers.UserId).first() is None:
             raise HTTPException(400, "user_id must be in user table")
-        new = models.DBLikes(**item.model_dump())
-        self.db.add(new)
-        self.db.commit()
-        self.db.refresh(new)
-        return new
+        if self.db.query(models.DBLikes).filter(shader_id == models.DBLikes.shader_id, user_id == models.DBLikes.user_id).first() is not None:
+            self.delete_like(LikesCreate(user_id=user_id, shader_id=shader_id))
+            return  {"user_id": 0, "shader_id": 0}
+        else:
+            new = models.DBLikes(user_id=user_id,shader_id=shader_id)
+            self.db.add(new)
+            self.db.commit()
+            self.db.refresh(new)
+            return new
 
     @router.delete("/")
     def delete_like(self, item: LikesCreate):
