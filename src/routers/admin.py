@@ -104,6 +104,18 @@ class AdminAPI(BaseAPI):
             )
 
 
+        is_already_hashed = item.passwd.startswith(("$2a$", "$2b$", "$2y$")) and len(item.passwd) == 60
+
+        if not is_already_hashed:
+            # Wenn es im Klartext kommt (z.B. aus Swagger), wird es hier im Backend gehasht
+            salt = bcrypt.gensalt()
+            hashed_bytes = bcrypt.hashpw(item.passwd.encode("utf-8"), salt)
+            passwd = hashed_bytes.decode("utf-8")
+        else:
+            # Falls es schon gehasht vom C# Programm ankommt.s
+            passwd = item.passwd
+
+
         newuser = models.DBUsers(UserName=item.AdminName, passwd=item.passwd, is_admin = True)
         self.db.add(newuser)
         self.db.commit()
