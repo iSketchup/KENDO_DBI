@@ -176,8 +176,9 @@ class Shaders(BaseAPI):
         result = self.db.query(models.DBShader)
 
         if shader_user_name is not None:
-            shader_user = self.db.query(DBUsers).filter(models.DBUsers == shader_user_name).first()
+            shader_user = self.db.query(DBUsers).filter(models.DBUsers.UserName == shader_user_name).first()
             result = result.filter(DBShader.user_id == shader_user.UserId)
+
         if shader_name is not None:
             result = result.filter(models.DBShader.ShaderName.ilike(f"%{shader_name}%"))
         if tags is not None:
@@ -188,7 +189,7 @@ class Shaders(BaseAPI):
             .distinct()
             )
 
-        return [self._serialize_shader(shader, user_id) for shader in result]
+        return [self._serialize_shader(shader, shader.user_id) for shader in result]
 
     @router.post("/", response_model=ShaderCreate)
     def create_shader(self, user_id: int, shader_code: str, shader_name: str):
