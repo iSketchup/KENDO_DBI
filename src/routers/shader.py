@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 import models
-from models import DBShader, DBTextures
+from models import DBShader, DBTextures, DBUsers
 from routers import likes, comments, tags
 from routers.base import BaseAPI
 from routers.likes import Likes
@@ -106,11 +106,18 @@ class Shaders(BaseAPI):
         }
 
         if include_comments:
-            result["ShaderComments"] = (
-                self.db.query(models.DBComments)
+            comments_query = (
+                self.db.query(models.DBComments, models.DBUsers)
+                .join(models.DBUsers, models.DBUsers.UserId == models.DBComments.user_id)
                 .filter(models.DBComments.shader_id == shader.ShaderId)
                 .all()
             )
+
+            result["ShaderComments"] = [{
+                    "CommentText": comment.CommentText,
+                    "CommentAuthor": author.UserName,
+                } for comment, author in comments_query]
+
 
         return result
 
@@ -165,11 +172,12 @@ class Shaders(BaseAPI):
         return shader
 
     @router.get("/filter/", response_model=list[ShaderResponse])
-    def get_by_filters(self, user_id:int, shader_user_id: Optional[int] = Query(None), shader_name: Optional[str] = Query(None),tags: Optional[list[str]] = Query(None)):
+    def get_by_filters(self, user_id:int, shader_user_name: Optional[str] = Query(None), shader_name: Optional[str] = Query(None),tags: Optional[list[str]] = Query(None)):
         result = self.db.query(models.DBShader)
 
-        if shader_user_id is not None:
-            result = result.filter(models.DBShader.user_id == shader_user_id)
+        if shader_user_name is not None:
+            shader_user = self.db.query(DBUsers).filter(models.DBUsers == shader_user_name).first()
+            result = result.filter(DBShader.user_id == shader_user.UserId)
         if shader_name is not None:
             result = result.filter(models.DBShader.ShaderName.ilike(f"%{shader_name}%"))
         if tags is not None:
@@ -216,7 +224,7 @@ class Shaders(BaseAPI):
 
         return self._serialize_shader(new, user_id, True)
 
-    @router.post("/shadertag", response_model=tags.ShaderTagsResponse)
+    @router.post("/shadertag/{shader_id}", response_model=tags.ShaderTagsResponse)
     def create_shadertag(self, tag_id: int, user_id: int, shader_id: int):
         shader = (
             self.db.query(models.DBShader)

@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
 from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
-from sqlalchemy.engine import connection_memoize
 from sqlalchemy.orm import Session
 from database import get_db
 import models
@@ -29,26 +28,26 @@ class Comments(BaseAPI):
     @router.get("/", response_model=list[CommentResponse])
     def comments(self, shader_id : int):
         if self.db.query(models.DBShader).filter(shader_id == models.DBShader.ShaderId).first() is None:
-            raise HTTPException(400, "shader_id must be in shader table")
+            raise HTTPException(404, f"shader_id {shader_id} not found")
 
         serialized_response = []
         all_comments = self.db.query(models.DBComments).filter(DBComments.shader_id == shader_id).all()
         for single_comment in all_comments:
-            comment_Author = self.db.query(models.DBUsers.UserName).where(DBUsers.UserId == single_comment.user_id).first()[0]
-            serialized_response.append({"CommentAuthor": comment_Author, "CommentText":single_comment.CommentText})
+            Author = self.db.query(models.DBUsers).where(DBUsers.UserId == single_comment.user_id).first()
+            serialized_response.append({"CommentAuthor": Author.UserName , "CommentText":single_comment.CommentText})
         return serialized_response
 
     @router.post("/")
     def new_comment(self, user_id : int, shader_id : int, item : CommentBase):
         if self.db.query(models.DBShader).filter(shader_id == models.DBShader.ShaderId).first() is None:
-            raise HTTPException(400, "shader_id must be in shader table")
+            raise HTTPException(404, f"shader_id {shader_id} not found")
         if self.db.query(models.DBUsers).filter(user_id == models.DBUsers.UserId).first() is None:
-            raise HTTPException(400, "user_id must be in user table")
+            raise HTTPException(404, f"user_id {user_id} must be in user table")
         new = models.DBComments(user_id=user_id, shader_id=shader_id, CommentText=item.CommentText)
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
-        return new
+        return {"code" : 200 ,"status": "ok"}
 
 
     @router.delete("/{comment_id}")

@@ -42,6 +42,11 @@ class Tags(BaseAPI):
 
     @router.post("/", response_model=TagsResponse)
     def create_tag(self, item: TagsCreate):
+        all_tags = self.db.query(models.DBTags).all()
+        for tag in all_tags:
+            if tag.TagName == item.TagName:
+                raise HTTPException(status_code=409, detail="Tag already exists")
+
         new = models.DBTags(**item.model_dump())
         self.db.add(new)
         self.db.commit()
@@ -49,9 +54,17 @@ class Tags(BaseAPI):
         return new
 
     @router.delete("/{tag_id}", status_code=204)
-    def delete_tag(self, tag_id: int):
+    def delete_tag_by_id(self, tag_id: int):
         tag = self.db.query(models.DBTags).filter(models.DBTags.TagId == tag_id).first()
         if tag is None:
             raise HTTPException(status_code=404, detail="Tag not found")
+        self.db.delete(tag)
+        self.db.commit()
+
+    @router.delete("/", status_code=204)
+    def delete_tag_by_id(self, item : TagsCreate):
+        tag = self.db.query(models.DBTags).filter(models.DBTags.TagName == item.TagName).first()
+        if tag is None:
+            raise HTTPException(status_code=404, detail="Tagname not found")
         self.db.delete(tag)
         self.db.commit()
