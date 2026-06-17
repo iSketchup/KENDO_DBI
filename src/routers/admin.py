@@ -65,6 +65,9 @@ class AdminAPI(BaseAPI):
     def usernames(self, username : str):
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
 
+        if not user:
+            raise HTTPException(status_code=404, detail=f"Admin '{username}' nicht gefunden")
+
         return user
 
 

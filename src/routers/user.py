@@ -61,6 +61,9 @@ class UsersAPI(BaseAPI):
     def usernames(self, username : str):
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == username).first()
 
+        if not user:
+            raise HTTPException(status_code=404, detail=f"User '{username}' nicht gefunden")
+
         return user
 
     @router.post("/login", response_model=UserResponse)
@@ -79,13 +82,12 @@ class UsersAPI(BaseAPI):
         is_hashed = user.passwd.startswith(("$2a$", "$2b$", "$2y$")) and len(user.passwd) == 60
 
         if is_hashed:
-            # Normaler Bcrypt-Vergleich
             result = bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8"))
         else:
-            # Fallback: Direktwert-Vergleich für alte Klartext-Passwörter
+
             result = (request.passwd == user.passwd)
 
-            # Aktualisiert den User auf den aktuellen Hash
+
             if result:
                 salt = bcrypt.gensalt()
                 user.passwd = bcrypt.hashpw(request.passwd.encode("utf-8"), salt).decode("utf-8")
