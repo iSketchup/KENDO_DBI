@@ -63,9 +63,9 @@ class UsersAPI(BaseAPI):
 
         return user
 
-
     @router.post("/login", response_model=UserResponse)
     def login(self, request: LoginRequest):
+
         user = self.db.query(models.DBUsers).filter(models.DBUsers.UserName == request.UserName).first()
 
         if not user:
@@ -75,7 +75,9 @@ class UsersAPI(BaseAPI):
 
         ## ToDo: da auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
 
-        if not bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8")):
+        result = bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8"))
+
+        if not result:
             raise HTTPException(status_code=401, detail="Login is invalid")
 
         return user
@@ -92,7 +94,20 @@ class UsersAPI(BaseAPI):
                                                         "mit gleichen Namen zu erstellen")
 
 
-        newuser = models.DBUsers(UserName=item.UserName, passwd=item.passwd)
+        is_already_hashed = item.passwd.startswith(("$2a$", "$2b$", "$2y$")) and len(item.passwd) == 60
+
+        if not is_already_hashed:
+            # Wenn es im Klartext kommt (z.B. aus Swagger), wird es hier im Backend gehasht
+            salt = bcrypt.gensalt()
+            hashed_bytes = bcrypt.hashpw(item.passwd.encode("utf-8"), salt)
+            passwd = hashed_bytes.decode("utf-8")
+        else:
+            # Falls es schon gehasht vom C# Programm ankommt.s
+            passwd = item.passwd
+
+
+
+        newuser = models.DBUsers(UserName=item.UserName, passwd=passwd)
         self.db.add(newuser)
         self.db.commit()
         self.db.refresh(newuser)
