@@ -75,7 +75,21 @@ class UsersAPI(BaseAPI):
 
         ## ToDo: da auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
 
-        result = bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8"))
+        # Prüfen, ob es sich überhaupt um einen gültigen Bcrypt-Hash in der DB handelt
+        is_hashed = user.passwd.startswith(("$2a$", "$2b$", "$2y$")) and len(user.passwd) == 60
+
+        if is_hashed:
+            # Normaler Bcrypt-Vergleich
+            result = bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8"))
+        else:
+            # Fallback: Direktwert-Vergleich für alte Klartext-Passwörter
+            result = (request.passwd == user.passwd)
+
+            # Aktualisiert den User auf den aktuellen Hash
+            if result:
+                salt = bcrypt.gensalt()
+                user.passwd = bcrypt.hashpw(request.passwd.encode("utf-8"), salt).decode("utf-8")
+                self.db.commit()
 
         if not result:
             raise HTTPException(status_code=401, detail="Login is invalid")
