@@ -145,17 +145,6 @@ class Shaders(BaseAPI):
         if tag is None:
             raise HTTPException(status_code=404, detail="Tag not found")
 
-        existing = (
-            self.db.query(models.DBShaderTags)
-            .filter(
-                models.DBShaderTags.shader_id == shader_id,
-                models.DBShaderTags.tag_id == tag_id,
-            )
-            .first()
-        )
-
-        if existing is not None:
-            raise HTTPException(status_code=400, detail="Shader already has this tag")
 
         new = models.DBShaderTags(
             tag_id=tag_id,
@@ -220,17 +209,18 @@ class Shaders(BaseAPI):
 
         if shader_user_name is not None:
             shader_user = self.db.query(DBUsers).filter(models.DBUsers.UserName == shader_user_name).first()
+            if shader_user is None:
+                raise HTTPException(status_code=404, detail="Username not found")
             result = result.filter(DBShader.user_id == shader_user.UserId)
-
         if shader_name is not None:
             result = result.filter(models.DBShader.ShaderName.ilike(f"%{shader_name}%"))
         if tags is not None:
-            result = (
-            result.join(models.DBShaderTags, models.DBShaderTags.shader_id == models.DBShader.ShaderId)
-            .join(models.DBTags, models.DBTags.TagId == models.DBShaderTags.tag_id)
-            .filter(models.DBTags.TagName.in_(tags))
-            .distinct()
-            )
+            pass
+            #result = (
+            #result.join(models.DBShaderTags, models.DBShaderTags.shader_id == models.DBShader.ShaderId)
+            #.join(models.DBTags, models.DBTags.TagId == models.DBShaderTags.tag_id)
+            #.filter(models.DBTags.TagName.in_(tags))
+            #.distinct())
 
         return [self._serialize_shader(shader, shader.user_id) for shader in result]
 
@@ -272,6 +262,18 @@ class Shaders(BaseAPI):
     def create_shadertag(self, tag_id: int, user_id: int, shader_id: int):
 
         new = self.create_Shadertag_model(tag_id,user_id,shader_id)
+        existing = (
+            self.db.query(models.DBShaderTags)
+            .filter(
+                models.DBShaderTags.shader_id == shader_id,
+                models.DBShaderTags.tag_id == tag_id,
+            )
+            .first()
+        )
+
+        if existing is not None:
+            raise HTTPException(status_code=400, detail="Shader already has this tag")
+
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
@@ -280,16 +282,54 @@ class Shaders(BaseAPI):
 
     @router.delete("/shadertag/{shader_id}/{tag_name}", response_model=tags.ShaderTagsResponse)
     def delete_shadertag(self, tag_name: str, user_id: int, shader_id: int):
+        shader = (
+            self.db.query(models.DBShader)
+            .filter(models.DBShader.ShaderId == shader_id)
+            .first()
+        )
 
-        tag = self.db.query(models.DBTags).filter(DBTags.TagName == tag_name).first()
+        if shader is None:
+            raise HTTPException(status_code=404, detail="Shader not found")
 
-        new = self.create_Shadertag_model(tag.TagId,user_id,shader_id)
+        if shader.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Only Author of the Shader can Change the Shadertags",
+            )
 
-        self.db.delete(new)
-        self.db.refresh(new)
+        tag = (
+            self.db.query(models.DBTags)
+            .filter(models.DBTags.TagName == tag_name)
+            .first()
+        )
+
+        if tag is None:
+            raise HTTPException(status_code=404, detail="Tag not found")
+
+        shader_tag = (
+            self.db.query(models.DBShaderTags)
+            .filter(
+                models.DBShaderTags.shader_id == shader_id,
+                models.DBShaderTags.tag_id == tag.TagId,
+                models.DBShaderTags.user_id == user_id,
+            )
+            .first()
+        )
+
+        if shader_tag is None:
+            raise HTTPException(status_code=404, detail="Shader does not have this tag")
+
+        response = {
+            "tag_id": shader_tag.tag_id,
+            "shader_id": shader_tag.shader_id,
+            "user_id": shader_tag.user_id,
+        }
+
+        self.db.delete(shader_tag)
         self.db.commit()
-        self.db.refresh(new)
-        return new
+
+        return response
+
 
     @router.get("/shadertag/{shader_id}", response_model=list[str])
     def get_tags_by_id(self, shader_id: int):
