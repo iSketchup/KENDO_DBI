@@ -38,7 +38,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.get("/")
 def root():
-    return {"Message": "Hello World\n Besuche /docs für die API"}
+    return {
+        "success": True,
+        "status_code": 200,
+        "message": "Hello World\nBesuche /docs für die API"
+    }
 
 
 if __name__ == "__main__":
