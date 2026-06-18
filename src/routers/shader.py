@@ -39,6 +39,7 @@ class ShaderUpdate(ShaderCreate):
 
 class ShaderResponse(ShaderCreate):
     ShaderId: int
+    ShaderAuthor : str
     ShaderTags: list[str]
     ShaderLikes: likes.LikesResponse
     ShaderTextures: list[TextureResponse]
@@ -97,11 +98,18 @@ class Shaders(BaseAPI):
             .all()
         )
 
+        user = self.db.query(DBUsers).filter(DBUsers.UserId == shader.user_id).first()
+        shader_Author = "guest"
+        if user is not None:
+            shader_Author = user.UserName
+
+
         result = {
             "ShaderName": shader.ShaderName,
             "ShaderCode": shader.ShaderCode,
             "user_id": shader.user_id,
             "ShaderId": shader.ShaderId,
+            "ShaderAuthor": shader_Author,
             "ShaderTags": self._get_shader_tags(shader.ShaderId),
             "ShaderLikes": self._get_shader_likes(shader.ShaderId, user_id),
             "ShaderTextures": textures,
