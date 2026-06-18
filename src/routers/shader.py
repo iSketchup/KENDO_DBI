@@ -1,7 +1,9 @@
+from logging import raiseExceptions
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, responses, Query
 from fastapi.params import Depends
+from pip._internal.cli import status_codes
 from pydantic import BaseModel, field_validator, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from pydantic._internal import _serializers
@@ -10,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 import models
-from models import DBShader, DBTextures, DBUsers
+from models import DBShader, DBTextures, DBUsers, DBTags
 from routers import likes, comments, tags
 from routers.base import BaseAPI
 from routers.likes import Likes
@@ -121,6 +123,47 @@ class Shaders(BaseAPI):
 
         return result
 
+    def create_Shadertag_model(self, tag_id: int, user_id:int, shader_id:int):
+        shader = (
+            self.db.query(models.DBShader)
+            .filter(models.DBShader.ShaderId == shader_id)
+            .first()
+        )
+
+        if shader is None:
+            raise HTTPException(status_code=404, detail="Shader not found")
+
+        if shader.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Only Author of the Shader can Change the Shadertags")
+
+        tag = (
+            self.db.query(models.DBTags)
+            .filter(models.DBTags.TagId == tag_id)
+            .first()
+        )
+
+        if tag is None:
+            raise HTTPException(status_code=404, detail="Tag not found")
+
+        existing = (
+            self.db.query(models.DBShaderTags)
+            .filter(
+                models.DBShaderTags.shader_id == shader_id,
+                models.DBShaderTags.tag_id == tag_id,
+            )
+            .first()
+        )
+
+        if existing is not None:
+            raise HTTPException(status_code=400, detail="Shader already has this tag")
+
+        new = models.DBShaderTags(
+            tag_id=tag_id,
+            user_id=user_id,
+            shader_id=shader_id,
+        )
+        return  new
+
     @router.get("/{shader_id}", response_model=SingleShaderResponse)
     def get_shader_by_id(self, user_id: int, shader_id: int):
         shader = (
@@ -225,51 +268,30 @@ class Shaders(BaseAPI):
 
         return self._serialize_shader(new, user_id, True)
 
-    @router.post("/shadertag/{shader_id}", response_model=tags.ShaderTagsResponse)
+    @router.post("/shadertag/{shader_id}/{tag_id}", response_model=tags.ShaderTagsResponse)
     def create_shadertag(self, tag_id: int, user_id: int, shader_id: int):
-        shader = (
-            self.db.query(models.DBShader)
-            .filter(models.DBShader.ShaderId == shader_id)
-            .first()
-        )
 
-        if shader is None:
-            raise HTTPException(status_code=404, detail="Shader not found")
-
-        tag = (
-            self.db.query(models.DBTags)
-            .filter(models.DBTags.TagId == tag_id)
-            .first()
-        )
-
-        if tag is None:
-            raise HTTPException(status_code=404, detail="Tag not found")
-
-        existing = (
-            self.db.query(models.DBShaderTags)
-            .filter(
-                models.DBShaderTags.shader_id == shader_id,
-                models.DBShaderTags.tag_id == tag_id,
-            )
-            .first()
-        )
-
-        if existing is not None:
-            raise HTTPException(status_code=400, detail="Shader already has this tag")
-
-        new = models.DBShaderTags(
-            tag_id=tag_id,
-            user_id=user_id,
-            shader_id=shader_id,
-        )
-
+        new = self.create_Shadertag_model(tag_id,user_id,shader_id)
         self.db.add(new)
         self.db.commit()
         self.db.refresh(new)
 
         return new
 
-    @router.get("/shadertag", response_model=list[str])
+    @router.delete("/shadertag/{shader_id}/{tag_name}", response_model=tags.ShaderTagsResponse)
+    def delete_shadertag(self, tag_name: str, user_id: int, shader_id: int):
+
+        tag = self.db.query(models.DBTags).filter(DBTags.TagName == tag_name).first()
+
+        new = self.create_Shadertag_model(tag.TagId,user_id,shader_id)
+
+        self.db.delete(new)
+        self.db.refresh(new)
+        self.db.commit()
+        self.db.refresh(new)
+        return new
+
+    @router.get("/shadertag/{shader_id}", response_model=list[str])
     def get_tags_by_id(self, shader_id: int):
         return self._get_shader_tags(shader_id)
 
