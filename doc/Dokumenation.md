@@ -58,47 +58,104 @@
 ---
 
 # Projektlaufzeit (Daniels-Historie)
+# Projektlaufzeit
 
-| Datum | Name | Aufgabe |
-| :--- | :--- | :--- |
-| Jun 17 2026 | Daniel WALSER | Fehlermeldung ist jetzt im user und Admin für die Suche nach dem Namen vorhanden. |
-| Jun 17 2026 | Daniel WALSER | Bug fix. Im Login wird jetzt genauer geprüft, ob das Passwort vorhanden ist. |
-| Jun 17 2026 | Daniel WALSER | Bug fix. |
-| Jun 17 2026 | Daniel WALSER | Server ip anpassung. |
-| Jun 17 2026 | Daniel WALSER | Anpassung vom Admin.py. Hashing ist auf der Server Seite möglich. |
-| Jun 17 2026 | Daniel WALSER | Bug Fix. Versuch das SSL sicher zu machen. Im Backend ist es möglich ein hashpasswort zu erzeugen. |
-| Jun 16 2026 | Daniel WALSER | Bug fix. |
-| Jun 16 2026 | Daniel WALSER | Bug fix. |
-| Jun 16 2026 | Daniel WALSER | is_admin attribut hinzugefügt. Prüfung dass nur ein Admin existieren darf. |
-| Jun 16 2026 | Daniel WALSER | is_admin attribut wurde dem userResponse auch hinzugefügt. |
-| Jun 16 2026 | Daniel WALSER | ADmin wurde somit auch erstellt. |
-| Jun 15 2026 | Daniel WALSER | Requirements angepasst |
-| Jun 15 2026 | Daniel WALSER | API-KEY wurde noch fertig implementiert. |
-| Jun 11 2026 | Daniel WALSER | Update: Man kann eigentlich auch nur den Usernamen ohne Passwort abändern, anstatt nur das Passwort (Schreibfehler vom vorherigen Commit) |
-| Jun 11 2026 | Daniel WALSER | Jetzt kann für User auch nur das Passwort öndern |
-| Jun 8 2026 | Daniel WALSER | Update: Da es Probleme gab, gibt es eine Datei die das SSL erzeugt. |
-| Jun 8 2026 | Daniel WALSER | SSL-Zertifikat wird jetzt erstellt, wenn man keines zum starten hat. |
-| Jun 8 2026 | Daniel WALSER | Neue Route um die User nur nach dem Namen finden kann. |
-| Jun 7 2026 | Daniel WALSER | Anpassung von ChangeUser und DeleteUser an das C# Programm. Jetzt sucht das Programm nach den Usernamen anstelle nach der ID des Users. |
-| Jun 5 2026 | Daniel WALSER | Ohne Zertifikat kann man den Server auch starten. |
-| Jun 5 2026 | Daniel WALSER | Hier ist noch das ERM u. RM |
-| Jun 5 2026 | Daniel WALSER | Hier wurde HTTPS eingebunden (besonders wichtig für das Login). |
-| Jun 3 2026 | Daniel WALSER | ERM-RM angepasst |
-| Jun 1 2026 | Daniel WALSER | Requirements sind auf aktuellen Stand |
-| Mai 29 2026 | Daniel WALSER | 3. Teil Login |
-| Mai 28 2026 | Daniel WALSER | Versuch 2.teil: Login ermöglchen. |
-| Mai 27 2026 | Daniel WALSER | Versuch: Das Login ermöglichen. |
-| Mai 27 2026 | Daniel WALSER | Hier wurden mal die Hashing Methoden erstellt. |
-| Mai 25 2026 | Daniel WALSER | User: Eine Alias wurde eingefügt, damit der Server einen neuen User erstellen kann. |
-| Mai 24 2026 | Daniel WALSER | Merge remote-tracking branch 'origin/main' |
-| Mai 24 2026 | Daniel WALSER | PUT: Username abändern sodass zwei den gleichen haben ist nicht möglich. |
-| Mai 24 2026 | Daniel WALSER | POST: User mit gleichen Namen sind nicht mehr möglich. |
-| Mai 24 2026 | Daniel WALSER | Merge remote-tracking branch 'origin/main' |
-| Mai 24 2026 | Daniel WALSER | Post: gleiche Usernamen sind nicht mehr erlaubt. |
-| Mai 24 2026 | Daniel WALSER | Put Methode hinzugefügt und das Delete wurde gefixt. |
-| Mai 24 2026 | Daniel WALSER | Put Methode hinzugefügt und das Delete wurde gefixt. |
-| Mai 23 2026 | Daniel WALSER | Maximale Länge von Strings angepasst. Routen angepasst. |
-| Mai 21 2026 | Daniel WALSER | Hier ist die FastAPI für unser Projekt. Der User wurde somit auch erstellt. |
+| Datum               | Autor         | Aufgabe                                                                                             |
+| ------------------- | ------------- | --------------------------------------------------------------------------------------------------- |
+| 2026-06-18 20:29:43 | jnhghgi       | init_db now fills your db with test data                                                            |
+| 2026-06-18 15:13:28 | iSketch_up    | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-18 15:13:16 | iSketch_up    | wip                                                                                                 |
+| 2026-06-18 12:44:55 | jnhghgi       | added shader Author                                                                                 |
+| 2026-06-18 11:17:21 | jnhghgi       | imporved shader tags structur                                                                       |
+| 2026-06-18 10:29:00 | iSketch_up    | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-18 10:28:35 | iSketch_up    | added a respons code to base root for checking availability                                         |
+| 2026-06-18 08:09:32 | jnhghgi       | imporved shader tags structur                                                                       |
+| 2026-06-17 21:59:47 | jnhghgi       | fixed like_create not toggling between creating and deleting like                                   |
+| 2026-06-17 21:36:41 | jnhghgi       | fixed wrong response for get_by_filters                                                             |
+| 2026-06-17 20:47:57 | Daniel WALSER | Fehlermeldung ist jetzt im user und Admin für die Suche nach dem Namen vorhanden.                   |
+| 2026-06-17 20:14:24 | Daniel WALSER | Bug fix. Im Login wird jetzt genauer geprüft, ob das Passwort vorhanden ist.                        |
+| 2026-06-17 20:00:39 | Daniel WALSER | Bug fix.                                                                                            |
+| 2026-06-17 13:13:47 | Daniel WALSER | Server ip anpassung.                                                                                |
+| 2026-06-17 10:09:38 | Daniel WALSER | Anpassung vom Admin.py. Hashing ist auf der Server Seite möglich.                                   |
+| 2026-06-17 06:58:05 | jnhghgi       | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-17 06:57:31 | jnhghgi       | improved error handling for tag and comments                                                        |
+| 2026-06-17 07:49:28 | Daniel WALSER | Bug Fix. Versuch das SSL sicher zu machen. Im Backend ist es möglich ein hashpasswort zu erzeugen.  |
+| 2026-06-16 19:25:22 | jnhghgi       | created init_db.py                                                                                  |
+| 2026-06-16 21:14:22 | Daniel WALSER | Bug fix.                                                                                            |
+| 2026-06-16 20:59:13 | Daniel WALSER | Bug fix.                                                                                            |
+| 2026-06-16 20:06:46 | Daniel WALSER | is_admin attribut hinzugefügt. Prüfung dass nur ein Admin existieren darf.                          |
+| 2026-06-16 17:34:21 | jnhghgi       | changed the comment route to return serialized comments                                             |
+| 2026-06-16 18:58:12 | Daniel WALSER | is_admin attribut wurde dem userResponse auch hinzugefügt.                                          |
+| 2026-06-16 18:51:40 | iSketch_up    | added a route for creating a new shader loaded with a sample                                        |
+| 2026-06-16 18:23:34 | Daniel WALSER | ADmin wurde somit auch erstellt.                                                                    |
+| 2026-06-15 19:07:05 | iSketchup     | typos                                                                                               |
+| 2026-06-15 18:40:22 | iSketchup     | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-15 18:39:40 | iSketchup     | gitignore update                                                                                    |
+| 2026-06-15 18:06:04 | Daniel WALSER | Requirements angepasst                                                                              |
+| 2026-06-15 15:21:48 | jnhghgi       | changed get_filter_by_user_id to a more flexible filter                                             |
+| 2026-06-15 12:49:48 | Daniel WALSER | API-KEY wurde noch fertig implementiert.                                                            |
+| 2026-06-14 17:12:00 | iSketchup     | reworks + textures added                                                                            |
+| 2026-06-14 13:06:06 | jnhghgi       | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-14 15:00:12 | iSketch_up    | holy wip                                                                                            |
+| 2026-06-14 12:51:16 | jnhghgi       | tryed to implement dry                                                                              |
+| 2026-06-11 12:30:10 | Daniel WALSER | Update: Man kann eigentlich auch nur den Usernamen ohne Passwort abändern, anstatt nur das Passwort |
+| 2026-06-11 12:28:17 | Daniel WALSER | Jetzt kann für User auch nur das Passwort öndern                                                    |
+| 2026-06-09 22:42:48 | iSketchup     | reworks + textures added                                                                            |
+| 2026-06-09 15:54:04 | jnhghgi       | fixed get shader by user                                                                            |
+| 2026-06-09 15:45:48 | jnhghgi       | deleted unused router_per_user, updated shader router, WIP shader per user_id                       |
+| 2026-06-09 15:43:10 | jnhghgi       | fixed shadertag models and tag,like route structure                                                 |
+| 2026-06-08 15:28:13 | Daniel WALSER | Update: Da es Probleme gab, gibt es eine Datei die das SSL erzeugt.                                 |
+| 2026-06-08 15:08:28 | Daniel WALSER | SSL-Zertifikat wird jetzt erstellt, wenn man keines zum starten hat.                                |
+| 2026-06-08 14:50:11 | Daniel WALSER | Neue Route um die User nur nach dem Namen finden kann.                                              |
+| 2026-06-08 13:59:51 | iSketch_up    | added a Texture model and a Name Column for Shaders                                                 |
+| 2026-06-08 13:59:24 | iSketch_up    | gitignore update                                                                                    |
+| 2026-06-07 15:53:06 | Daniel WALSER | Anpassung von ChangeUser und DeleteUser an das C# Programm.                                         |
+| 2026-06-06 23:37:43 | jnhghgi       | updated route structures                                                                            |
+| 2026-06-06 16:13:06 | iSketchup     | wip                                                                                                 |
+| 2026-06-06 13:43:45 | jnhghgi       | deleted shadertags route                                                                            |
+| 2026-06-06 13:38:20 | jnhghgi       | Created tags and shadertags and a simple auth not implemented yet tho                               |
+| 2026-06-05 20:24:08 | iSketchup     | updated erm and rm                                                                                  |
+| 2026-06-05 18:28:56 | Daniel WALSER | Ohne Zertifikat kann man den Server auch starten.                                                   |
+| 2026-06-05 17:55:40 | Daniel WALSER | Hier ist noch das ERM u. RM                                                                         |
+| 2026-06-05 17:29:03 | Daniel WALSER | Hier wurde HTTPS eingebunden.                                                                       |
+| 2026-06-03 16:59:05 | iSketch_up    | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-06-03 16:58:50 | iSketch_up    | renamed                                                                                             |
+| 2026-06-03 11:50:47 | Daniel WALSER | ERM-RM angepasst                                                                                    |
+| 2026-06-01 12:09:12 | Daniel WALSER | Requirements sind auf aktuellen Stand                                                               |
+| 2026-05-31 20:52:01 | iSketchup     | shader can be updated                                                                               |
+| 2026-05-31 20:42:25 | iSketchup     | reworked how shaders work:)                                                                         |
+| 2026-05-29 09:51:29 | Daniel WALSER | 3. Teil Login                                                                                       |
+| 2026-05-28 16:44:26 | Daniel WALSER | Versuch 2.teil: Login ermöglchen.                                                                   |
+| 2026-05-27 15:08:24 | Daniel WALSER | Versuch: Das Login ermöglichen.                                                                     |
+| 2026-05-27 13:13:59 | Daniel WALSER | Hier wurden mal die Hashing Methoden erstellt.                                                      |
+| 2026-05-25 14:18:04 | jnhghgi       | Created comments router and updated likes router                                                    |
+| 2026-05-25 13:54:38 | jnhghgi       | Fixed like router not being able to find foreign key relationships                                  |
+| 2026-05-25 12:49:09 | Daniel WALSER | User: Eine Alias wurde eingefügt, damit der Server einen neuen User erstellen kann.                 |
+| 2026-05-24 18:39:53 | Daniel WALSER | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-05-24 18:39:43 | Daniel WALSER | PUT: Username abändern sodass zwei den gleichen haben ist nicht möglich.                            |
+| 2026-05-24 16:33:05 | jnhghgi       | Created likes router and fixed likes model                                                          |
+| 2026-05-24 18:32:06 | Daniel WALSER | POST: User mit gleichen Namen sind nicht mehr möglich.                                              |
+| 2026-05-24 17:14:13 | iSketchup     | shaders are postable                                                                                |
+| 2026-05-24 17:11:20 | iSketchup     | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-05-24 17:11:03 | iSketchup     | made rooute for getting shaders by id                                                               |
+| 2026-05-24 17:07:49 | Daniel WALSER | Merge remote-tracking branch 'origin/main'                                                          |
+| 2026-05-24 17:07:28 | Daniel WALSER | Post: gleiche Usernamen sind nicht mehr erlaubt.                                                    |
+| 2026-05-24 17:06:19 | iSketchup     | made main include shader router                                                                     |
+| 2026-05-24 17:06:11 | Daniel WALSER | Put Methode hinzugefügt und das Delete wurde gefixt.                                                |
+| 2026-05-24 16:51:32 | Daniel WALSER | Put Methode hinzugefügt und das Delete wurde gefixt.                                                |
+| 2026-05-23 09:24:42 | Daniel WALSER | Maximale Länge von Strings angepasst. Routen angepasst.                                             |
+| 2026-05-22 23:10:01 | jnhghgi       | Created models for Tag, ShaderTag, Comment, Shader and improved User model                          |
+| 2026-05-23 00:35:16 | iSketchup     | cleanup                                                                                             |
+| 2026-05-23 00:33:42 | iSketchup     | updated gitignore                                                                                   |
+| 2026-05-21 14:04:40 | Daniel WALSER | Hier ist die FastAPI für unser Projekt. Der User wurde somit auch erstellt.                         |
+| 2026-05-21 10:08:31 | jnhghgi       | Create Boilerplate Code for FastAPI                                                                 |
+| 2026-05-21 10:06:36 | jnhghgi       | init                                                                                                |
+| 2026-05-18 22:13:26 | iSketchup     | init                                                                                                |
+| 2026-05-18 22:12:57 | iSketchup     | init                                                                                                |
+| 2026-05-18 18:18:10 | iSketchup     | init                                                                                                |
+| 2026-05-18 18:17:22 | iSketch_up    | init                                                                                                |
+| 2026-05-18 18:04:08 | iSketchup     | Initial commit                                                                                      |
+
 
 ---
 
