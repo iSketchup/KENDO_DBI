@@ -5,6 +5,7 @@ from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+from models import DBTags
 from routers.base import BaseAPI
 
 router = APIRouter(prefix="/tags", tags=["Tags"])
@@ -51,7 +52,7 @@ class Tags(BaseAPI):
         self.db.refresh(new)
         return new
 
-    @router.delete("/{tag_id}", status_code=204)
+    @router.delete("/delete_id/{tag_id}", status_code=204)
     def delete_tag_by_id(self, tag_id: int):
         tag = self.db.query(models.DBTags).filter(models.DBTags.TagId == tag_id).first()
         if tag is None:
@@ -59,8 +60,9 @@ class Tags(BaseAPI):
         self.db.delete(tag)
         self.db.commit()
 
-    @router.delete("/{tag_name}", status_code=204)
-    def delete_tag_by_id(self, tag_name: str):
+
+    @router.delete("/delete_name/{tag_name}", status_code=204)
+    def delete_tag_by_name(self, tag_name: str):
         tag = self.db.query(models.DBTags).filter(models.DBTags.TagName == tag_name).first()
         if tag is None:
             raise HTTPException(status_code=404, detail="Tagname not found")
