@@ -56,3 +56,8 @@ class DBTextures(Base):
     Texture64 = Column(String)
     shader_id = Column(Integer, ForeignKey("Shaders.ShaderId"))
 
+class DBLogging(Base):
+    __tablename__ = "Logging"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("Users.UserId"))
+    LogText = Column(String)

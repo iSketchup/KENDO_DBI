@@ -6,6 +6,7 @@ from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+from models import DBLogging
 from routers.base import BaseAPI
 from auth import verify_api_key
 
@@ -50,11 +51,37 @@ class AdminResponse(AdminCreate):
 
 
 
+class LogResponse(BaseModel):
+    LogText: str
+    user_id: int
+
 @cbv(router)
 class AdminAPI(BaseAPI):
     db: Session = Depends(get_db)
 
     api_key: str = Depends(verify_api_key)
+
+    @router.get("/Log", response_model=list[LogResponse])
+    def get_log(self):
+        return self.db.query(DBLogging).all()
+
+    @router.delete("/Log/{user_id}", status_code=204)
+    def del_log(self, user_id: int):
+        self.db.query(DBLogging).filter(DBLogging.user_id == user_id).delete()
+        self.db.commit()
+
+    @router.post("/Log", response_model=LogResponse)
+    def add_log(self, item: LogResponse):
+
+        if self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item.user_id).first() is None:
+            raise HTTPException(400, "user_id must be in user table")
+
+        new = models.DBLogging(**item.model_dump())
+        self.db.add(new)
+        self.db.commit()
+        self.db.refresh(new)
+        return new
+
 
     @router.get("/", response_model=list[AdminResponse])
     def users(self):

@@ -6,6 +6,7 @@ from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
+from models import DBLogging
 from routers.base import BaseAPI
 from auth import verify_api_key
 
