@@ -54,9 +54,6 @@
   - [POST /{user_id}/{shader_id}/comments/](#post-user_idshader_idcomments)
   - [DELETE /{user_id}/{shader_id}/comments/{comment_id}](#delete-user_idshader_idcommentscomment_id)
 - [Datenbankmodell](#datenbankmodell)
-- [Testdaten aus init_db.py](#testdaten-aus-init_dbpy)
-- [Gesamtübersicht aller Endpunkte](#gesamtübersicht-aller-endpunkte)
-- [Technische Hinweise zur aktuellen Implementierung](#technische-hinweise-zur-aktuellen-implementierung)
 
 ---
 
