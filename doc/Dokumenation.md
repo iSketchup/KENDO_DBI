@@ -60,7 +60,7 @@
 # Instruction
 
 - Repo Clonen
-- .env File erstellen mit folgendem Inhalt: ```Kendo_Key = "<dein_API_key>"```
+- .env File erstellen mit folgendem Inhalt: ```KENOD_KEY = "<dein_API_key>"```
 - requirements installieren
 - init_db.py File runnen lassen um die Datenbank mit test Daten zu befüllen
 - main.py File runnen oder in /src uvicorn.app 
