@@ -1,11 +1,10 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from models import DBTags, DBShader
 from routers.base import BaseAPI
 
 router = APIRouter(prefix="/tags", tags=["Tags"])

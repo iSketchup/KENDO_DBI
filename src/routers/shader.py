@@ -1,21 +1,16 @@
-from logging import raiseExceptions
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, responses, Query
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from pip._internal.cli import status_codes
-from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic import BaseModel,  ConfigDict
 from fastapi_restful.cbv import cbv
-from pydantic._internal import _serializers
-from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from database import get_db
 import models
-from models import DBShader, DBTextures, DBUsers, DBTags
+from models import DBShader, DBTextures, DBUsers
 from routers import likes, comments, tags
 from routers.base import BaseAPI
-from routers.likes import Likes
 
 router = APIRouter(prefix="/{user_id}/shaders", tags=["Shader"])
 
@@ -203,7 +198,6 @@ class Shaders(BaseAPI):
 
         for i in item.ShaderTextures:
             self.create_shadertextures(shader_id, i.Texture64)
-
 
 
         self.db.commit()

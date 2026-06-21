@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 

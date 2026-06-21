@@ -106,8 +106,6 @@ class AdminAPI(BaseAPI):
             raise HTTPException(status_code=404, detail="User not found")
 
 
-        ## ToDo: da auf der pos seite momentan nicht gehasht wird kan ndas  oben nie funktionieren
-
         if not bcrypt.checkpw(request.passwd.encode("utf-8"), user.passwd.encode("utf-8")):
             raise HTTPException(status_code=401, detail="Login is invalid")
 

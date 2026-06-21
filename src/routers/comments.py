@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
-from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic import BaseModel,  Field, ConfigDict
 from fastapi_restful.cbv import cbv
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from models import DBComments, DBShader, DBUsers
+from models import DBComments,  DBUsers
 from routers.base import BaseAPI
 
 router = APIRouter(prefix="/{user_id}/{shader_id}/comments", tags=["Comment"])
@@ -37,7 +37,7 @@ class Comments(BaseAPI):
             serialized_response.append({"CommentAuthor": Author.UserName , "CommentText":single_comment.CommentText})
         return serialized_response
 
-    @router.post("/")
+    @router.post("/", response_model=CommentCreate)
     def new_comment(self, user_id : int, shader_id : int, item : CommentBase):
         if self.db.query(models.DBShader).filter(shader_id == models.DBShader.ShaderId).first() is None:
             raise HTTPException(404, f"shader_id {shader_id} not found")
