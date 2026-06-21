@@ -57,7 +57,18 @@
 
 ---
 
-# Projektlaufzeit (Daniels-Historie)
+# Instruction
+
+- Repo Clonen
+- .env File erstellen mit folgendem Inhalt: ```Kendo_Key = "<dein_API_key>"```
+- requirements installieren
+- init_db.py File runnen lassen um die Datenbank mit test Daten zu befüllen
+- main.py File runnen oder in /src uvicorn.app 
+- auf diese URL gehen https://127.0.0.1:8000/docs 
+
+
+
+
 # Projektlaufzeit
 
 | Datum               | Autor         | Aufgabe                                                                                             |
