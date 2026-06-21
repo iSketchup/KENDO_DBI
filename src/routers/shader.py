@@ -20,10 +20,10 @@ class TextureResponse(BaseModel):
     Texture64: str
 
 class ShaderBlank(BaseModel):
-    user_id: int
     ShaderName: str
 
 class ShaderCreate(ShaderBlank):
+    user_id: int
     ShaderCode: str
 
 
@@ -226,23 +226,8 @@ class Shaders(BaseAPI):
 
         return [self._serialize_shader(shader, shader.user_id) for shader in result]
 
-    @router.post("/", response_model=ShaderCreate)
-    def create_shader(self, user_id: int, shader_code: str, shader_name: str):
-        new = models.DBShader(
-            user_id=user_id,
-            ShaderCode=shader_code,
-            ShaderName=shader_name,
-        )
-
-        self.db.add(new)
-        self.db.commit()
-        self.db.refresh(new)
-
-        return new
-
-
     @router.post("/new", response_model=SingleShaderResponse)
-    def create_blank_shader(self, user_id: int, input: ShaderCreate):
+    def create_blank_shader(self, user_id: int, input: ShaderBlank):
 
         base_shader = """#version 330 core\n\nout vec4 outputColor;\n\nin vec2 TexCoord;\n\nuniform float uTime;\n\nvec3 hsvToRgb(vec3 c)\n{\n    vec3 p = abs(fract(c.xxx + vec3(0.0, 2.0/3.0, 1.0/3.0)) * 6.0 - 3.0);\n    return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);\n}\n\nvoid main()\n{\n    vec2 uv = TexCoord;\n\n    float diagonal = (uv.x + uv.y) * 0.5;\n\n    float hue = fract(diagonal + uTime * 0.15);\n\n    vec3 color = hsvToRgb(vec3(hue, 1.0, 1.0));\n\n    outputColor = vec4(color, 1.0);\n}
         """
@@ -355,6 +340,11 @@ class Shaders(BaseAPI):
         self.db.commit()
         self.db.refresh(Tex)
         return Tex
+
+    @router.delete("/{shader_id}/shadertexture/{TextureId}", status_code=204)
+    def delete_shadertextures(self, TextureId: int,):
+        self.db.query(DBTextures).filter(DBTextures.id == TextureId).delete()
+        self.db.commit()
 
     @router.get("/{shader_id}/shadertexture")
     def get_textures_by_id(self, shader_id: int, ):
