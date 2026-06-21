@@ -70,5 +70,4 @@ class Likes(BaseAPI):
         item = self.db.query(models.DBLikes).filter(models.DBLikes.shader_id == shader_id, models.DBLikes.user_id == user_id).first()
         self.db.delete(item)
         self.db.commit()
-        self.db.refresh()
         return item
