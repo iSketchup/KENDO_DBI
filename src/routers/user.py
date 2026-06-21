@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 from models import DBLogging
+from routers.admin import LogResponse
 from routers.base import BaseAPI
 from auth import verify_api_key
 
@@ -171,3 +172,15 @@ class UsersAPI(BaseAPI):
                                                         f" wurde nicht gefunden")
         self.db.delete(user)
         self.db.commit()
+
+    @router.post("/Log", response_model=LogResponse)
+    def add_log(self, item: LogResponse):
+
+        if self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item.user_id).first() is None:
+            raise HTTPException(400, "user_id must be in user table")
+
+        new = models.DBLogging(**item.model_dump())
+        self.db.add(new)
+        self.db.commit()
+        self.db.refresh(new)
+        return new

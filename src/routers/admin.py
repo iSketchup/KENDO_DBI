@@ -70,17 +70,7 @@ class AdminAPI(BaseAPI):
         self.db.query(DBLogging).filter(DBLogging.user_id == user_id).delete()
         self.db.commit()
 
-    @router.post("/Log", response_model=LogResponse)
-    def add_log(self, item: LogResponse):
 
-        if self.db.query(models.DBUsers).filter(models.DBUsers.UserId == item.user_id).first() is None:
-            raise HTTPException(400, "user_id must be in user table")
-
-        new = models.DBLogging(**item.model_dump())
-        self.db.add(new)
-        self.db.commit()
-        self.db.refresh(new)
-        return new
 
 
     @router.get("/", response_model=list[AdminResponse])
